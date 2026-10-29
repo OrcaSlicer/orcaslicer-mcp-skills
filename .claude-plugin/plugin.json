@@ -1,0 +1,14 @@
+{
+  "name": "orcaslicer-mcp-skills",
+  "displayName": "OrcaSlicer MCP",
+  "version": "1.0.0",
+  "description": "Drive OrcaSlicer through its MCP server: load and arrange models, change settings and presets, supports, multi-colour, gizmos, calibration, the Design (CAD) tab, slicing and export.",
+  "author": {
+    "name": "OrcaSlicer",
+    "url": "https://github.com/OrcaSlicer"
+  },
+  "homepage": "https://github.com/OrcaSlicer/orcaslicer-mcp-skills",
+  "repository": "https://github.com/OrcaSlicer/orcaslicer-mcp-skills",
+  "license": "AGPL-3.0-only",
+  "keywords": ["orcaslicer", "3d-printing", "slicer", "mcp", "g-code"]
+}

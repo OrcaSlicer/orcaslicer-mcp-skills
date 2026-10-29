@@ -1,0 +1,15 @@
+{
+  "name": "orcaslicer",
+  "description": "Agent skills for OrcaSlicer",
+  "owner": {
+    "name": "OrcaSlicer",
+    "url": "https://github.com/OrcaSlicer"
+  },
+  "plugins": [
+    {
+      "name": "orcaslicer-mcp-skills",
+      "source": "./",
+      "description": "Drive OrcaSlicer through its MCP server: load and arrange models, change settings and presets, supports, multi-colour, gizmos, calibration, the Design (CAD) tab, slicing and export."
+    }
+  ]
+}

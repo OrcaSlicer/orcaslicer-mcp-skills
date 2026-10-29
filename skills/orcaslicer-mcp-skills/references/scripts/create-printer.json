@@ -1,0 +1,244 @@
+{
+ "orca_script": 1,
+ "name": "create printer",
+ "steps": [
+  {
+   "tool": "ui_input",
+   "args": {
+    "target": {
+     "class": "PlaterPresetComboBox",
+     "index": 0
+    },
+    "value": "--Create printer --"
+   },
+   "await": false,
+   "save_as": "c"
+  },
+  {
+   "tool": "wait",
+   "args": {
+    "for": "dialog",
+    "timeout_s": 10
+   }
+  },
+  {
+   "tool": "ui_click",
+   "args": {
+    "target": {
+     "class": "CheckBox",
+     "within": "Create Printer/Nozzle",
+     "index": 0
+    }
+   }
+  },
+  {
+   "tool": "ui_input",
+   "args": {
+    "target": {
+     "label": "Printer",
+     "class": "wxTextCtrl",
+     "within": "Create Printer/Nozzle",
+     "index": 0
+    },
+    "value": "DIY",
+    "submit": false
+   }
+  },
+  {
+   "tool": "ui_input",
+   "args": {
+    "target": {
+     "label": "Printer",
+     "class": "wxTextCtrl",
+     "within": "Create Printer/Nozzle",
+     "index": 1
+    },
+    "value": "Bedslinger 250",
+    "submit": false
+   }
+  },
+  {
+   "tool": "ui_input",
+   "args": {
+    "target": {
+     "label": "Nozzle Diameter",
+     "class": "ComboBox",
+     "within": "Create Printer/Nozzle"
+    },
+    "value": "0.4 mm"
+   }
+  },
+  {
+   "tool": "ui_input",
+   "args": {
+    "target": {
+     "label": "Printable Space",
+     "class": "TextInput",
+     "within": "Create Printer/Nozzle",
+     "index": 0
+    },
+    "value": "250"
+   }
+  },
+  {
+   "tool": "ui_input",
+   "args": {
+    "target": {
+     "label": "Printable Space",
+     "class": "TextInput",
+     "within": "Create Printer/Nozzle",
+     "index": 1
+    },
+    "value": "210"
+   }
+  },
+  {
+   "tool": "ui_input",
+   "args": {
+    "target": {
+     "label": "Origin",
+     "class": "TextInput",
+     "within": "Create Printer/Nozzle",
+     "index": 0
+    },
+    "value": "0"
+   }
+  },
+  {
+   "tool": "ui_input",
+   "args": {
+    "target": {
+     "label": "Origin",
+     "class": "TextInput",
+     "within": "Create Printer/Nozzle",
+     "index": 1
+    },
+    "value": "0"
+   }
+  },
+  {
+   "tool": "ui_input",
+   "args": {
+    "target": {
+     "label": "Max Print Height",
+     "class": "TextInput",
+     "within": "Create Printer/Nozzle"
+    },
+    "value": "240"
+   }
+  },
+  {
+   "tool": "dialog_respond",
+   "args": {
+    "button": "ok"
+   }
+  },
+  {
+   "tool": "ui_input",
+   "args": {
+    "target": {
+     "label": "Select Vendor",
+     "within": "Create Printer/Nozzle"
+    },
+    "value": "Creality"
+   }
+  },
+  {
+   "tool": "ui_input",
+   "args": {
+    "target": {
+     "class": "ComboBox",
+     "within": "Create Printer/Nozzle",
+     "index": 1
+    },
+    "value": "Creality Ender-3 V3 SE @ 0.4 nozzle"
+   }
+  },
+  {
+   "tool": "ui_click",
+   "args": {
+    "target": {
+     "label": "Create Based on Current Printer",
+     "class": "wxStaticText",
+     "within": "Create Printer/Nozzle",
+     "index": 1
+    }
+   }
+  },
+  {
+   "tool": "ui_click",
+   "args": {
+    "target": {
+     "class": "CheckBox",
+     "within": "Create Printer/Nozzle",
+     "index": 2
+    }
+   },
+   "expect": {
+    "/checked": {
+     "eq": true
+    }
+   }
+  },
+  {
+   "tool": "ui_click",
+   "args": {
+    "target": {
+     "class": "CheckBox",
+     "within": "Create Printer/Nozzle",
+     "index": 3
+    }
+   },
+   "expect": {
+    "/checked": {
+     "eq": true
+    }
+   }
+  },
+  {
+   "tool": "ui_click",
+   "args": {
+    "target": {
+     "class": "CheckBox",
+     "within": "Create Printer/Nozzle",
+     "index": 18
+    }
+   },
+   "expect": {
+    "/checked": {
+     "eq": true
+    }
+   }
+  },
+  {
+   "tool": "ui_click",
+   "args": {
+    "target": {
+     "label": "Create",
+     "class": "Button",
+     "within": "Create Printer/Nozzle"
+    }
+   }
+  },
+  {
+   "tool": "wait",
+   "args": {
+    "for": "dialog",
+    "timeout_s": 10
+   }
+  },
+  {
+   "tool": "dialog_respond",
+   "args": {
+    "button": "Printer Setting"
+   }
+  },
+  {
+   "tool": "wait",
+   "args": {
+    "for": "job",
+    "job": "${jobs.c}"
+   }
+  }
+ ]
+}
