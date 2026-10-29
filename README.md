@@ -104,7 +104,8 @@ OrcaSlicer's MCP tools are available or the request is about OrcaSlicer.
 
 The plugin is instructions only: one skill with its reference files. It installs no MCP server, runs
 no code of its own and sends nothing anywhere. The agent works through the OrcaSlicer MCP connection
-you set up, which accepts connections from your own computer only.
+you set up, which accepts connections from your own computer only. See the
+[privacy policy](PRIVACY.md).
 
 ## Releasing
 
