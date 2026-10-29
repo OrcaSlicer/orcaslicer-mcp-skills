@@ -35,8 +35,14 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
 - **Verify through state, not pictures:** `list_objects`, `list_plates`, `get_settings`, the `slice`
   reply, `get_preview`, exported files. Take a screenshot only when the user wants an image.
 - **Settings:**
-  - Find keys with `get_settings {"query":"<words>"}`: key, label, enum `values` with their
-    `labels` (write the value), current value.
+  - Find keys with `get_settings {"query":"<words>"}` (key or label): key, label, enum `values` with
+    their `labels` (write the value), current value.
+  - What a setting does, or which one controls an effect: `explain_settings {"keys":[…]}` or
+    `{"query":"stringing"}` (a few distinctive words, matched in tooltips too): the full tooltip,
+    `where` (page > group) and `wiki`. Check it before changing a setting you don't know.
+  - Tuning (stronger, faster, less stringing): `explain_settings {"scope":"process"}` maps every
+    setting by page > group; read the groups involved in full with `{"where":"Strength > Walls"}`
+    (a group, not a whole page), then their values with `get_settings`.
   - `set_settings {"scope":"print"|"filament"|"printer","values":{...}}`, many keys per call. Other
     scopes: `"object","object":N` and `"volume","object":N,"volume":M` (overrides; `extruder` is the
     filament), `"project"` (plate type, slot colours, flushing, prime tower), `"plate","plate":N`.

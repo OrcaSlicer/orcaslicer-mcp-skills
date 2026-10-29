@@ -4,6 +4,14 @@
 
 - Find keys: `get_settings {"scope":"print","query":"scarf"}` (key or label); meta has `values` and
   their `labels` for enums. Read another preset without selecting it: `"preset":"0.16mm Optimal @BBL X1C"`.
+- What a setting does: `explain_settings {"keys":["seam_slope_type"]}`: the whole tooltip, `scope`,
+  `where` (page > group in that tab) and `wiki`; get_settings' meta has no tooltip. Which setting
+  controls something: `explain_settings {"query":"ooze travel"}`, a few distinctive words matched in
+  keys, labels and tooltips, most words matched first (`"scope":"filament"` narrows it).
+- Whole view for tuning: `explain_settings {"scope":"process"}` (no keys/query/where) maps every setting
+  as `{"Page > Group": {key: label}}`; `{"scope":"process","where":"Strength > Infill"}` returns that
+  group in full. Read groups: a whole page (`"where":"Quality"`) can exceed what the client keeps in the
+  conversation. Settings with no row on a page are under `"(no page)"`.
 - Edit: `set_settings {"scope":"print"|"filament"|"printer","values":{...}}`; a filament slot's preset
   `"filament_slot":2`. The reply's `applied` and `changed` (the app's own adjustments included). [ref]
 - Per-variant values (meta lists `variants` and `active`, e.g. X1C speeds and temperatures "Direct
