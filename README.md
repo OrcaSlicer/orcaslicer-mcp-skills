@@ -1,10 +1,10 @@
 # OrcaSlicer MCP skills
 
 Agent skills for [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer), the open-source 3D printing
-slicer. With OrcaSlicer's MCP server connected, an AI agent such as Claude Code or Codex can load,
-place and arrange models, change print, filament and printer settings and presets, add supports,
-modifiers and multi-colour painting, use the cut, text and other gizmos, run calibration tests, model
-parts in the Design (CAD) tab, slice, and read or export the results. The skill teaches the agent the
+slicer. With OrcaSlicer's MCP server connected, an AI agent such as Claude Code, Codex or opencode
+can load, place and arrange models, change print, filament and printer settings and presets, add
+supports, modifiers and multi-colour painting, use the cut, text and other gizmos, run calibration
+tests, model parts in the Design (CAD) tab, slice, and read or export the results. The skill teaches the agent the
 tool calls that work, the settings whose meaning their label hides, and the traps that otherwise cost
 retries, so tasks finish in fewer calls and with fewer screenshots.
 
@@ -43,6 +43,30 @@ codex plugin add orcaslicer-mcp-skills@orcaslicer
 
 Update later with `codex plugin marketplace upgrade orcaslicer`, then run the `codex plugin add`
 command again.
+
+### opencode
+
+opencode has no plugin marketplace, so it takes the skill as a folder. Clone this repository and copy
+the skill into `~/.config/opencode/skills`:
+
+```bash
+git clone https://github.com/OrcaSlicer/orcaslicer-mcp-skills.git
+```
+
+```bash
+mkdir -p ~/.config/opencode/skills && cp -R orcaslicer-mcp-skills/skills/orcaslicer-mcp-skills ~/.config/opencode/skills/
+```
+
+On Windows, in PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force "$HOME\.config\opencode\skills" | Out-Null; Copy-Item -Recurse orcaslicer-mcp-skills\skills\orcaslicer-mcp-skills "$HOME\.config\opencode\skills\"
+```
+
+opencode also reads `~/.claude/skills` and `~/.agents/skills`, so a manual install there (below)
+already reaches it; keep the skill in one of these folders only. A Claude Code or Codex plugin
+install doesn't reach opencode. Restart opencode after installing; to update, `git pull` in the
+clone and copy the folder again.
 
 ### Manual install
 
