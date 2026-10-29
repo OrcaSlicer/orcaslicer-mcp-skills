@@ -1,0 +1,35 @@
+{
+  "name": "orcaslicer-mcp-skills",
+  "version": "1.0.2",
+  "description": "Drive OrcaSlicer through its MCP server: load and arrange models, change settings and presets, supports, multi-colour, gizmos, calibration, the Design (CAD) tab, slicing and export.",
+  "author": {
+    "name": "OrcaSlicer",
+    "url": "https://github.com/OrcaSlicer"
+  },
+  "homepage": "https://github.com/OrcaSlicer/orcaslicer-mcp-skills",
+  "repository": "https://github.com/OrcaSlicer/orcaslicer-mcp-skills",
+  "license": "AGPL-3.0-only",
+  "keywords": ["orcaslicer", "3d-printing", "slicer", "mcp", "g-code"],
+  "skills": "./skills/",
+  "requires_local_executor": true,
+  "interface": {
+    "displayName": "OrcaSlicer MCP",
+    "shortDescription": "Slice 3D prints in OrcaSlicer",
+    "longDescription": "Lets the agent drive OrcaSlicer, the open-source 3D printing slicer, through its MCP server: load, place and arrange models, change print, filament and printer settings and presets, add supports, modifiers and multi-colour painting, use the cut, text and other gizmos, run calibration tests, model parts in the Design (CAD) tab, slice, and read or export the results. The skill teaches the agent the tool calls that work, the settings whose meaning their label hides, and the traps that otherwise cost retries.\n\nNeeds OrcaSlicer running on the same computer, with Preferences > General > AI features > MCP server turned on and added to the agent through Add to an agent.",
+    "developerName": "OrcaSlicer",
+    "category": "Engineering",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://github.com/OrcaSlicer/orcaslicer-mcp-skills",
+    "supportURL": "https://github.com/OrcaSlicer/orcaslicer-mcp-skills/issues",
+    "privacyPolicyURL": "https://github.com/OrcaSlicer/orcaslicer-mcp-skills/blob/main/PRIVACY.md",
+    "defaultPrompt": [
+      "Load benchy.stl in OrcaSlicer, scale it to 150% and slice it with 0.16 mm layers. How long will it print?",
+      "Add tree supports to the open OrcaSlicer project, slice it and export the G-code to my Desktop.",
+      "Design a 40 mm cable clip with a 6 mm hole in OrcaSlicer's Design tab."
+    ],
+    "brandColor": "#009789",
+    "logo": "./assets/icon.png",
+    "composerIcon": "./assets/icon.png",
+    "screenshots": []
+  }
+}

@@ -109,8 +109,10 @@ you set up, which accepts connections from your own computer only. See the
 
 ## Releasing
 
-Raise `version` in `.claude-plugin/plugin.json` with every release; Claude Code and Codex installs
-update only when it changes. Check the plugin with `claude plugin validate --strict .` before pushing.
+Raise `version` in `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` with every release;
+Claude Code and Codex installs update only when it changes. The Codex manifest also carries the
+OpenAI plugin directory listing and marks the plugin desktop-only, since it needs OrcaSlicer running
+on the same computer. Check the plugin with `claude plugin validate --strict .` before pushing.
 
 ## License
 
