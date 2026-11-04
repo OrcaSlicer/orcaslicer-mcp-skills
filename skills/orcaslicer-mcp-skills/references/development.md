@@ -23,6 +23,9 @@ waits until the app is ready and prints the session: `url`, `port`, `token`, `pi
 
 - `--cad` turns the Design (CAD) tab on, which `cad_call` needs. The app reads it only at startup,
   so pass it on every launch, also with a reused datadir.
+- Python scripts (`run_python`) run only when the datadir's `OrcaSlicer.conf` has
+  `"mcp_python_scripts": "true"` in its `app` section before the launch; no tool turns it on. A `.py`
+  given to `--mcp-script` runs as a Python script.
 - `--datadir DIR` reuses a datadir: pass the first launch's on every relaunch, so presets stay the
   same. Never point it at your real OrcaSlicer profile.
 - `--port N` when 13619 is taken (your own OrcaSlicer with MCP on). Several instances at once: give
@@ -108,9 +111,11 @@ test scripts use it for refusals, followed by a check that nothing changed. A sc
 - Native dialogs (message boxes, file pickers) can't be clicked: register `dialog_auto_answer` before
   the step that opens them (a picker can only be cancelled; its text is its prompt). wx dialogs take
   `dialog_respond` or an auto-answer, which presses the button and runs its handler.
-- `webview_eval` runs in a modal's page only for the setup wizard and the preset bundle dialogs
-  (`orca_command:help_setup_wizard:orca`, `orca_command:preset_bundle:orca`, `"await": false` in a
-  script); commit such a page with its own button (`closed: true` in the reply).
+- Web pages (the setup wizard, sign-in, web dialogs, plugin windows and dock panels) are driven like
+  widgets: `ui_snapshot` lists each shown page's elements under its web view, and `ui_click`,
+  `ui_input` and `ui_key` take them by ref or by `{"web":"Next","kind":"button","css":"#id","within":…}`.
+  `webview_eval` runs JavaScript in a page; while a modal is open, only its pages answer. Commit a
+  modal page with its own button (`closed: true` in the reply).
 
 ## Test scripts
 
@@ -124,16 +129,22 @@ shapes. Run one with `tools/mcp/orca_mcp.py run-script tools/mcp/tests/<name>.js
   preferences), `calibration.json`, `slice_stats.json`, `preview.json`;
 - `gizmos.json` (all 17 gizmos; at another size via `run_script` `"vars":{"window_size":[1100,760]}`);
 - `context_menus.json`, `rows.json`, `plate_icons.json`, `dialogs_canvas_input.json`,
-  `webview_modal.json`;
+  `webview_modal.json`, `web_dialogs.json` (web pages driven like widgets), `agent_forms.json`
+  (argument names and forms agents often write), `recording.json` (needs an ffmpeg with libx265 and
+  libx264);
 - with `--cad`: `cad_sketch_to_solid.json`, `cad_sketch_edit.json`, `cad_topology_targets.json`,
-  `cad_features.json`, `cad_doc.json`.
+  `cad_features.json`, `cad_doc.json`, `cad_canvas.json`.
 
 Harness tests (`tools/mcp/test_*.py`, each against the launched instance): `test_stdio_bridge.py`,
 `test_recovery_under_load.py`, `test_cancel_pending_slice.py`, `test_ref_locator_export.py`,
 `test_worker_admission.py`, `test_export_running_job.py` (about 2 min), `test_send_gcode.py` (stub
-host), `test_set_view_preview.py`, `test_webview_modal.py`, and with `--cad` `test_cad_replay.py`,
-`test_cad_slow_build.py`. Unit tests: `tests/slic3rutils/test_mcp_*.cpp` (`ctest --test-dir
-./tests/slic3rutils -C Release`), tags `[Mcp]`, `[Mcp][CAD]`.
+host), `test_set_view_preview.py`, `test_webview_modal.py`, `test_script_runner_hidden.py`, and with
+`--cad` `test_cad_replay.py`, `test_cad_slow_build.py`, `test_cad_failed_job.py`.
+`test_web_ui.py` drives a fixture plugin's pages: `test_web_ui.py --install DIR`, launch with
+`--datadir DIR`, then run it. `test_plugin_tools.py` (a plugin's calls into the tools) launches its own
+instances. Unit tests:
+`tests/slic3rutils/test_mcp_*.cpp` (`ctest --test-dir ./tests/slic3rutils -C Release`), tags `[Mcp]`,
+`[Mcp][CAD]`.
 
 A new feature MCP should reach: a Speed Dial command in `NativeCommands.cpp` (key, description,
 `Path` param that skips its dialog) is enough for most; a typed tool in the matching
@@ -149,6 +160,10 @@ feature reachable").
   exact everywhere, or launch with `GDK_BACKEND=x11`.
 - On X11 OrcaSlicer's own popups are drawn into the capture; another application's window over it
   comes out black (`approximate`). Xvfb has nothing on top.
+- Record videos under X11 too, since a Wayland recording leaves dialogs out:
+  `orca_mcp.py launch --xvfb --width 1920 --height 1080`, and on a seeded datadir
+  `"window_mainframe": "0; 0; 1920; 1080; 0"` in `OrcaSlicer.conf`'s `app` section so the window fills
+  the screen (`set_view window_size` resizes but keeps its position).
 - Launching by hand on a fresh datadir: set `SSL_CERT_FILE` (the harness does), or a CA-bundle
   prompt blocks startup.
 

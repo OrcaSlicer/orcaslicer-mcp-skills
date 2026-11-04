@@ -23,7 +23,7 @@ Typed neighbours: variable layer height is `set_layer_height_profile`, parts and
   `ui_click {"target":{"gizmo":"Text"}}` → Text / Height / Depth as in `references/multicolor.md` →
   `ui_click {"target":{"imgui":"Cut"}}` → wait idle → Done → wait idle; the part is `negative`. [ref]
 - SVG on top: `set_view {"camera":"top"}` → `set_view {"camera":"fit_selection"}` →
-  `run_action {"id":"orca_command:add_primitive_svg:orca","param":"/abs/star.svg"}` → wait idle →
+  `run_action {"id":"add_primitive_svg","param":"/abs/star.svg"}` → wait idle →
   `ui_input {"target":{"imgui":"Depth"},"value":0.6}` → `ui_input {"target":{"imgui":"Size"},"value":50}`
   → wait idle → `ui_click {"target":{"gizmo":"SVG"}}` (close) →
   `set_settings {"scope":"volume","object":0,"volume":1,"values":{"extruder":2}}` for a second colour. [ref]
@@ -43,7 +43,8 @@ Typed neighbours: variable layer height is `set_layer_height_profile`, parts and
      (object-centred, before the instance's rotation): `ui_mouse {"action":"move","at":{"object":0,
      "point":[cx + r + 0.1, …]}}`, then the same call without `action`. The reference used [-22.4,2,0]
      and [27.6,2,0] for Ø5 holes 50 mm apart on a 4 mm plate laid flat. When the bounding box doesn't
-     give the hole centres, take them from the mesh file with a short script.
+     give the hole centres, take them from the mesh with a Python script (`references/python.md`) or
+     from the model file.
   4. Read `ui_snapshot {"query":"Direct distance"}` → close → `transform {"object":0,"scale":<want/measured>}`.
 - Simplify (no toolbar icon): `ui_click {"target":{"gizmo":"Simplify"}}` → wait idle →
   `ui_input {"target":{"imgui_name":"use_count"},"value":true}` →
@@ -85,13 +86,16 @@ A sleep is `wait {"for":"dialog","timeout_s":2}`.
   (`set_view {"window_size":[1600,1000]}`) or turn the camera. No tool closes a notification; a
   warning one goes when its cause does (painted support enforcers with support off: turn
   `enable_support` on).
-- A drag starting off the model turns (left) or pans (right) the camera, with no error.
+- In a painting gizmo, a stroke whose press misses the object is refused with the pixel where it
+  first reaches the object: start it there. [ref] Elsewhere a drag off the model turns or pans the
+  camera as the user's mouse settings say (the reply's `camera_moved`); turn it with `set_view`
+  `camera` and `orbit` instead.
 - `spot` = a ray through the bbox centre along an axis; it misses between letters and into holes.
   Off-surface points need `"check":"point"` and an axis camera.
 - Texture: in a fresh app the first layer-image click only shows a tooltip; the library appears after
   thumbnails load, which `wait idle` ignores. Clear Resolution's Auto (`v2auto`) before typing it.
 - Measure "Edit to scale": `"submit": false` + click "Scale all" (Return closes the popup). After
-  `run_action {"id":"orca_command:undo:orca"}` the gizmo stays open: check `get_state.gizmo` first.
+  `run_action {"id":"undo"}` the gizmo stays open: check `get_state.gizmo` first.
 - "Add connectors" does nothing while a half isn't kept (Keep carries over). Connectors aren't
   flagged in `list_objects`; count parts by type.
 

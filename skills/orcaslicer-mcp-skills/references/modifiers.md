@@ -25,17 +25,17 @@
   (`sparse_infill_density`, `wall_loops`). Read back in `list_objects` `layer_config_ranges`; slice
   and check `layers`. [ref]
 - Change a part's type: `select {"volumes":[[0,1]]}` →
-  `run_action {"id":"orca_command:obj_type_modifier:orca"}` (`_part`, `_negative`,
+  `run_action {"id":"obj_type_modifier"}` (`_part`, `_negative`,
   `_support_blocker`, `_support_enforcer`, `_precise_seam`); part indices change, re-read
   `list_objects`. [ref]
 - Imported modifier zones: `add_part {"object":0,"type":"modifier","path":"/abs/zones.stl"}` (lands at
   the file's coordinates relative to the object's first part), or load both files and
-  `select {"objects":[0,1]}` → `run_action {"id":"orca_command:obj_assemble:orca"}` → change the
+  `select {"objects":[0,1]}` → `run_action {"id":"obj_assemble"}` → change the
   zone part's type as above. [ref]
-- Split into parts: `select {"objects":[0]}` → `run_action {"id":"orca_command:obj_split_parts:orca"}`;
+- Split into parts: `select {"objects":[0]}` → `run_action {"id":"obj_split_parts"}`;
   into objects: `obj_split_objects`. [ref]
 - Rename an object or part: `select {"objects":[0]}` (or `{"volumes":[[0,1]]}`) →
-  `run_action {"id":"orca_command:obj_rename:orca","param":"tall"}`. [ref]
+  `run_action {"id":"obj_rename","param":"tall"}`. [ref]
 - Move or resize a part: `transform {"object":0,"volume":1,"translate":[100,100,15],"mode":"absolute"}`
   (the part's centre on the bed), `"size":[null,null,3]`, `"scale":2`; rotation relative only. [ref]
 - Copy settings to another object: read the source's overrides (`get_settings` object scope) and

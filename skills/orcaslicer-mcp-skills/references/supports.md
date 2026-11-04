@@ -27,7 +27,7 @@
 - Elephant-foot compensation + brim: `{"elefant_foot_compensation":0.2,"elefant_foot_compensation_layers":2,
   "brim_type":"outer_only","brim_width":3,"brim_object_gap":0,"brim_use_efc_outline":true}` (a 0.4 mm
   total flare = 0.2 per side). [ref]
-- Interface-only support filament: `run_action {"id":"orca_command:filament_add:orca"}` →
+- Interface-only support filament: `run_action {"id":"filament_add"}` →
   `select_preset {"type":"filament","name":"…","filament_slot":2}` → plate type for PETG
   (`references/settings.md`) → auto-answer `{"match":"support material for the support interface","button":"yes"}`
   and `{"match":"recommend the following settings","button":"yes"}` → `set_settings {"scope":"print",

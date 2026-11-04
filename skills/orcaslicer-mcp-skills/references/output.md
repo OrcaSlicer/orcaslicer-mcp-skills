@@ -17,11 +17,11 @@
     `volumetric_flow_rate[1]`, shortest layer time = `layer_time_linear[0]`.
   - `summary` adds `prepare_time_s`, `travel_time_s`, `travel_mm`.
 - Export: `export {"format":"gcode","path":"/abs/x.gcode","overwrite":true}` (current plate,
-  `"plate":N` for another); `"sliced_3mf"` with `"plate":N|"all"` and a `.gcode.3mf` path;
+  `"plates":N` for another); `"sliced_3mf"` with `"plates":N|"all"` and a `.gcode.3mf` path;
   `"3mf"` the model without slicing data; `"stl"` all objects in one file. [ref]
 - One STL per object, named: rename the objects (`select {"objects":[i]}` →
-  `run_action {"id":"orca_command:obj_rename:orca","param":"bunny_keychain"}`), then
-  `run_action {"id":"orca_command:export_stl_multi:orca","param":"/abs/existing_dir"}` writes
+  `run_action {"id":"obj_rename","param":"bunny_keychain"}`), then
+  `run_action {"id":"export_stl_multi","param":"/abs/existing_dir"}` writes
   `<name>.stl` each. [ref]
 - Save + reopen: `save_project {"path":"/abs/p.3mf","overwrite":true}` →
   `open_files {"paths":["/abs/p.3mf"],"discard_changes":true}`. With modified presets the load asks
@@ -34,13 +34,23 @@
 - Upload to OctoPrint/Moonraker/PrusaLink: `set_settings {"scope":"printer","values":
   {"host_type":"moonraker","print_host":"http://127.0.0.1:7125"}}` (`"printhost_apikey"` for
   OctoPrint; `"bbl_use_printhost":true` on a Bambu printer) → `slice {}` → in one `run_script`:
-  `run_action {"id":"orca_command:send_gcode:orca"}` (`"await":false`, `"save_as":"send"`) →
+  `run_action {"id":"send_gcode"}` (`"await":false`, `"save_as":"send"`) →
   `ui_input {"target":{"class":"wxTextCtrl","within":"Send G-code to printer host"},"value":"part.gcode","submit":false}`
   → `dialog_respond {"button":"Upload"}` (or `"Upload and Print"`) → wait job. Then poll
   `get_state.uploads` until the row reads `completed` or `error`. [ref]
 - Preview view for screenshots:
   `set_view {"tab":"preview","view_type":"volumetric_flow_rate","layer_z":10.2}`;
   `"legend":{"Sparse infill":false,"travel":true}` hides or shows rows (after `view_type`). [ref]
+- Record a video: `start_recording {"captions":true,"pointer":true,"encode":true,"save_path":"/abs/demo.mkv","overwrite":true}`
+  (`"target":"canvas"` for the 3D view only) → the calls to show → `stop_recording {}`: frames,
+  seconds, and with `encode` an `encode` job → `wait {"for":"job","job":"jN"}` returns the MP4's path
+  (H.265 with the system ffmpeg; `encode_recording {"codec":"h264"}` for another). Captions show each
+  call; `pointer` highlights the pointer and its clicks. [ref]
+  - Answer each dialog as soon as it opens: `wait {"for":"dialog"}`, pause 2–3 s so a viewer can read
+    it (`wait {"for":"no_dialog","timeout_s":3}` returns after 3 s while it stays open), then
+    `dialog_respond`. [ref] Never `wait {"for":"idle"}` while a dialog may be open: idle needs no
+    dialog open, so the wait runs to its timeout and the video shows a frozen window.
+  - On Linux a Wayland recording leaves dialogs out: record under X11 (`references/development.md`).
 
 ## Traps
 

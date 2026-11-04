@@ -2,11 +2,13 @@
 
 Generated from `list_actions`; prefer a typed tool where one exists (`calibrate`, `arrange`, `transform`).
 
-`run_action {"id": "orca_command:<key>:orca"}` runs one; `"param"` passes its value as a string. A `path`
-param skips the file dialog: an absolute path for inputs, the JSON string `{"path": "/abs/out", "overwrite": true}`
-for outputs. `list_actions {"query": "..."}` searches them with each param's help. Object commands act on what
-`select` picked, and one that did nothing (nothing selected) is an error. Actions without a param that open a dialog
-return `blocked_by_dialog`. The Help and Plugins groups are left out, except the setup wizard.
+`run_action {"id": "<key>"}` runs one (the full id `orca_command:<key>:orca` works too); `"param"` passes its
+value as a string. A `path` param skips the file dialog: an absolute path for inputs, the JSON string
+`{"path": "/abs/out", "overwrite": true}` for outputs. `list_actions {"query": "..."}` searches them with each
+param's help. Object commands act on what `select` picked, and one that did nothing (nothing selected) is an
+error. Actions without a param that open a dialog return `blocked_by_dialog`. Left out: the Help and Plugins
+groups except the setup wizard, and the person's own Run Script, Start/Stop Recording and Take Screenshot
+commands (agents use `run_script`, `start_recording`, `stop_recording` and `screenshot`).
 
 ## Add Handy models
 
@@ -31,7 +33,7 @@ return `blocked_by_dialog`. The Help and Plugins groups are left out, except the
 | `add_primitive_cube` | text: X Y Z in mm, separated by spaces | Add a cube object to the current plate; fails while an object is selected. With a size, skips the size dialog. |
 | `add_primitive_cylinder` | text: diameter and height in mm, separated by a space | Add a cylinder object to the current plate; fails while an object is selected. With a size, skips the size dialog. The shape may then be turned toward the part-cooling fan, so the size is along its own axes before that turn. |
 | `add_primitive_disc` | text: diameter and height in mm, separated by a space | Add a disc object to the current plate; fails while an object is selected. With a size, skips the size dialog. The shape may then be turned toward the part-cooling fan, so the size is along its own axes before that turn. |
-| `add_primitive_svg` | path | Add an SVG as a new object, or as a part of the selected object. With a path, uses that file without a dialog; the part is created in the background (wait for idle), and the SVG gizmo opens on it. |
+| `add_primitive_svg` | path: absolute path of an .svg file | Add an SVG as a new object, or as a part of the selected object. With a path, uses that file without a dialog; the part is created in the background (wait for idle), and the SVG gizmo opens on it. |
 | `add_primitive_sphere` | text: diameter in mm | Add a sphere object to the current plate; fails while an object is selected. With a size, skips the size dialog. |
 | `add_primitive_text` |  | Add a Text object to the current plate. |
 | `add_primitive_torus` | text: inner diameter and tube diameter in mm, separated by a space | Add a torus object to the current plate; fails while an object is selected. With a size, skips the size dialog. The shape may then be turned toward the part-cooling fan, so the size is along its own axes before that turn. |
@@ -86,7 +88,6 @@ return `blocked_by_dialog`. The Help and Plugins groups are left out, except the
 | `plate_delete` |  | Delete the current plate. |
 | `plate_duplicate` |  | Duplicate the current plate. |
 | `plate_goto` | index: 0-based plate index | Make a plate the current one. |
-| `orca_plate_goto:0:orca` |  | Make plate 1 (index 0) the current plate. |
 | `plate_rename` |  | Rename the current plate (opens a dialog). |
 | `plate_toggle_lock` |  | Lock or unlock the current plate. |
 
@@ -94,11 +95,11 @@ return `blocked_by_dialog`. The Help and Plugins groups are left out, except the
 
 | key | param | does |
 |---|---|---|
-| `export_3mf` | path | Export the model as a .3mf without slicing data. With a path, writes there without a dialog. |
-| `export_all_sliced_file` | path | Export every plate's sliced file into one .gcode.3mf. With a path, writes there without a dialog. |
-| `export_gcode` | path | Export the current plate's G-code. With a path, exports there without a dialog once the plate is sliced; the export runs in the background. |
-| `export_stl` | path | Export all objects as one STL. With a path, writes there without a dialog. |
-| `export_sliced_file` | path | Export the current plate's sliced file (.gcode.3mf). With a path, writes there without a dialog. |
+| `export_3mf` | path: absolute .3mf path, or {"path": ..., "overwrite": true} | Export the model as a .3mf without slicing data. With a path, writes there without a dialog. |
+| `export_all_sliced_file` | path: absolute .3mf path, or {"path": ..., "overwrite": true} | Export every plate's sliced file into one .gcode.3mf. With a path, writes there without a dialog. |
+| `export_gcode` | path: absolute .gcode path, or {"path": ..., "overwrite": true} | Export the current plate's G-code. With a path, exports there without a dialog once the plate is sliced; the export runs in the background. |
+| `export_stl` | path: absolute .stl path, or {"path": ..., "overwrite": true} | Export all objects as one STL. With a path, writes there without a dialog. |
+| `export_sliced_file` | path: absolute .3mf path, or {"path": ..., "overwrite": true} | Export the current plate's sliced file (.gcode.3mf). With a path, writes there without a dialog. |
 | `send_gcode` |  | Open the Send G-code to printer host dialog for the current plate, as the Print button does for a printer with a print host (OctoPrint, Moonraker, PrusaLink, Duet...). Set the file name with ui_input and press Upload or Upload and Print with dialog_respond; the plate is sliced if needed, then uploaded in the background: get_state.uploads shows the row's state, and a failed upload also opens an error dialog. A replay uploads again. Fails for a printer without a print host, or one that prints through the Bambu network or printer agents. |
 | `slice_all` |  | Slice every plate and show the Preview tab. Returns at once; use the slice tool to wait for results. |
 | `slice_and_preview` |  | Slice the current plate and show the Preview tab. Returns at once; use the slice tool to wait for the result. |
@@ -109,16 +110,16 @@ return `blocked_by_dialog`. The Help and Plugins groups are left out, except the
 |---|---|---|
 | `export_drc_single` |  | Export all objects as one Draco (.drc) file. |
 | `export_drc_multi` |  | Export each object as its own Draco (.drc) file. |
-| `export_stl_multi` | path | Export each object as its own STL. With a directory, writes there without a dialog. |
-| `export_config` | path | Export presets as a bundle or ZIP archives. Opens a dialog: click the label of the kind to export, check the presets (their checkboxes are named after them), press OK, then answer the result message. With a directory, OK writes there instead of asking for a folder. |
+| `export_stl_multi` | path: absolute path of an existing directory | Export each object as its own STL. With a directory, writes there without a dialog. |
+| `export_config` | path: absolute path of an existing directory | Export presets as a bundle or ZIP archives. Opens a dialog: click the label of the kind to export, check the presets (their checkboxes are named after them), press OK, then answer the result message. With a directory, OK writes there instead of asking for a folder. |
 | `export_toolpaths_obj` |  | Export the sliced toolpaths as an OBJ. |
 
 ## Import
 
 | key | param | does |
 |---|---|---|
-| `import_file` | path | Import models (3MF/STL/STEP/SVG/OBJ/AMF). With a path, imports that file without a dialog. |
-| `import_configs` | path | Import presets. With a path, imports a preset .json, a .zip of them or an .orca_printer, .orca_filament or .orca_bundle without a dialog, and the message names the presets imported, replaced and kept; a .gcode loads the settings it was sliced with. |
+| `import_file` | path: absolute path of a model file | Import models (3MF/STL/STEP/SVG/OBJ/AMF). With a path, imports that file without a dialog. |
+| `import_configs` | path: absolute path, or {"path": ..., "on_conflict": "overwrite"} to replace presets that exist already (default "skip") | Import presets. With a path, imports a preset .json, a .zip of them or an .orca_printer, .orca_filament or .orca_bundle without a dialog, and the message names the presets imported, replaced and kept; a .gcode loads the settings it was sliced with. |
 | `import_zip_archive` |  | Import models from a ZIP archive (opens a file dialog). |
 
 ## Commands
@@ -126,13 +127,13 @@ return `blocked_by_dialog`. The Help and Plugins groups are left out, except the
 | key | param | does |
 |---|---|---|
 | `go_to_layer` | percent: 0-100 | Show the Preview tab at a layer chosen as a percentage of the layer range. |
-| `go_to_tab` | tab | Switch to a main window tab. |
-| `load_project` | path | Open a project. With a path, opens that file without a dialog (asks first if the current project has unsaved changes). |
+| `go_to_tab` | tab: tab id: home, prepare, preview, monitor, project, calibration, or a plugin page id | Switch to a main window tab. |
+| `load_project` | path: absolute path of a .3mf project | Open a project. With a path, opens that file without a dialog (asks first if the current project has unsaved changes). |
 | `new_project` |  | Start a new, empty project (asks first if the current one has unsaved changes). |
-| `open_preferences` | text: general, control, graphics, online or developer, optionally :<key>, e.g. control:auto_arrange | Open the Preferences dialog on a tab, scrolled to one preference when given (shown on its own tab). Its controls are named after their preference keys: ui_input {"target": {"name": key, "within": "Preferences"}} changes one through the dialog; get_settings scope preferences reads them. |
+| `open_preferences` | text: general, files, behaviour, control, graphics, online or developer, optionally :<key>, e.g. behaviour:auto_arrange | Open the Preferences dialog on a tab, scrolled to one preference when given (shown on its own tab). Its controls are named after their preference keys: ui_input {"target": {"name": key, "within": "Preferences"}} changes one through the dialog; get_settings scope preferences reads them. |
 | `redo` |  | Redo the last undone change. |
 | `save_project` |  | Save the project to its current file (asks for a name if it has none). |
-| `save_project_as` | path | Save the project as a .3mf file. With a path, saves there without a dialog. |
+| `save_project_as` | path: absolute output path, or {"path": ..., "overwrite": true} | Save the project as a .3mf file. With a path, saves there without a dialog. |
 | `undo` |  | Undo the last change to the project. |
 
 ## Calibration

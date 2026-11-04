@@ -29,7 +29,7 @@ process and filament first, then:
 Examples: `{"test":"flow_ratio","method":"pass1","top_surface_pattern":"monotonic",…}`;
 `{"test":"pressure_advance","method":"pattern","accelerations":[1000,2000],"speeds":[50,100],…}`
 (several objects on one plate: `slice {}`, then
-`export {"format":"sliced_3mf","plate":"all","path":"/abs/pa.gcode.3mf","overwrite":true}`);
+`export {"format":"sliced_3mf","plates":"all","path":"/abs/pa.gcode.3mf","overwrite":true}`);
 `{"test":"input_shaping_freq","start":15,"end":110,"shaper_type":"MZV",…}`. [ref]
 
 ## Apply and save a measured value
@@ -51,7 +51,7 @@ Reading results:
 - Flow pass 1 "+5" → ratio × 1.05; pass 2 adds its offset to the pass-1 ratio.
 - Retraction tower: export the G-code and read
   `; Calib_Retraction_tower: Z_HEIGHT: 12, length:3.2` at the height (don't compute it). [ref]
-- Tolerance test: `run_action {"id":"orca_command:add_handy_orca_tolerance_test:orca"}` with
+- Tolerance test: `run_action {"id":"add_handy_orca_tolerance_test"}` with
   `{"xy_hole_compensation":0,"xy_contour_compensation":0}`.
 
 ## Traps

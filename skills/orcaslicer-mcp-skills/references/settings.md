@@ -2,16 +2,17 @@
 
 ## Recipes
 
-- Find keys: `get_settings {"scope":"print","query":"scarf"}` (key or label); meta has `values` and
-  their `labels` for enums. Read another preset without selecting it: `"preset":"0.16mm Optimal @BBL X1C"`.
-- What a setting does: `explain_settings {"keys":["seam_slope_type"]}`: the whole tooltip, `scope`,
-  `where` (page > group in that tab) and `wiki`; get_settings' meta has no tooltip. Which setting
-  controls something: `explain_settings {"query":"ooze travel"}`, a few distinctive words matched in
-  keys, labels and tooltips, most words matched first (`"scope":"filament"` narrows it).
-- Whole view for tuning: `explain_settings {"scope":"process"}` (no keys/query/where) maps every setting
-  as `{"Page > Group": {key: label}}`; `{"scope":"process","where":"Strength > Infill"}` returns that
-  group in full. Read groups: a whole page (`"where":"Quality"`) can exceed what the client keeps in the
-  conversation. Settings with no row on a page are under `"(no page)"`.
+- What a setting does: `get_settings {"keys":["seam_slope_type"]}` with no scope finds it among the
+  process, filament and printer settings: the item's `scope` (the one `set_settings` takes), `value`,
+  and `meta` with the label, `description` (the whole tooltip), `where` (page > group in that tab), and
+  for enums `values` with their `labels`. [ref]
+- Which setting controls something: `get_settings {"query":"ooze travel"}`, a few distinctive words
+  matched in keys, labels and descriptions, best first (20 unless `limit`; `"scope":"filament"` narrows
+  it). [ref] Read another preset without selecting it: `"scope":"process","preset":"0.16mm Optimal @BBL X1C"`.
+- Whole view for tuning: `get_settings {"where":"?"}` answers with every page > group of the process
+  (`"scope":"filament"` or `"printer"` for theirs); `{"where":"Strength > Infill"}` returns that group in
+  full. Read groups: a whole page (`"where":"Quality"`) can exceed what the client keeps in the
+  conversation. [ref]
 - Edit: `set_settings {"scope":"print"|"filament"|"printer","values":{...}}`; a filament slot's preset
   `"filament_slot":2`. The reply's `applied` and `changed` (the app's own adjustments included). [ref]
 - Per-variant values (meta lists `variants` and `active`, e.g. X1C speeds and temperatures "Direct
@@ -35,17 +36,19 @@
   preset with `"inside_project":true`.
 - Share a filament with other printers: `set_settings {"scope":"filament","values":
   {"compatible_printers":["Voron 2.4 350 0.4 nozzle"]}}` (`[]` = all) → `save_preset` over it. [hand]
-- Nozzle on a Bambu printer: the sidebar's nozzle combo, which also reaches variants not installed:
-  `ui_input {"target":{"class":"ComboBox","index":0},"value":"0.6"}` → `wait {"for":"idle"}` →
-  `get_state.presets` (the filament may fall back to "Default Filament": `select_preset` it again) →
-  `select_preset` the process (`list_presets {"type":"process","query":"0.6 nozzle"}`). [ref] Other
-  printers: `select_preset {"type":"printer","name":"<model> 0.6 nozzle"}` when installed.
-  `nozzle_type` (`hardened_steel`) is a printer setting; `save_preset` the printer to keep it.
+- A preset that isn't installed (most system printers and filaments on a fresh install):
+  `list_presets {"type":"printer","query":"X1 Carbon","include_hidden":true}` lists it with
+  `visible: false` → `select_preset` it by name; the reply's `shown` names it. It stays in the
+  selectors for this session only: after a restart the app selects a visible preset again. [ref]
+- Nozzle: `select_preset {"type":"printer","name":"Bambu Lab X1 Carbon 0.6 nozzle"}`, installed or
+  not; the process follows (`0.30mm Standard @BBL X1C 0.6 nozzle`) and the filament may change:
+  re-read `get_state.presets` and `select_preset` the filament again. [ref] `nozzle_type`
+  (`hardened_steel`) is a printer setting; `save_preset` the printer to keep it.
 - Plate type: `set_settings {"scope":"project","values":{"curr_bed_type":"Textured PEI Plate"}}`
   (`meta.offered` lists the printer's); one plate only: plate scope (`references/output.md`). [ref]
 - Print host: `set_settings {"scope":"printer","values":{"host_type":"octoprint","print_host":"192.168.1.50","printhost_apikey":"…"}}`
   → `save_preset {"type":"printer","name":"…"}`. "Octo/Klipper" = `octoprint`; Moonraker `moonraker`.
-- Import presets: `run_action {"id":"orca_command:import_configs:orca","param":"/abs/My PLA.json"}`
+- Import presets: `run_action {"id":"import_configs","param":"/abs/My PLA.json"}`
   (`.json`, `.zip`, `.orca_filament`; `{"path":…,"on_conflict":"overwrite"}` replaces). The message
   names what was imported. [ref]
   - A `.orca_printer` / `.orca_bundle` imports its presets as `_local/<id>/<name>`, and its process
@@ -53,12 +56,12 @@
     `printer/*.json`, then `process/*.json`, then `filament/*.json`, one call each, and
     `select_preset` the printer, process and filament by name. [ref] The bundle's base printer must
     be installed.
-- Export presets: `run_action {"id":"orca_command:export_config:orca","param":"/abs/dir"}` opens the
+- Export presets: `run_action {"id":"export_config","param":"/abs/dir"}` opens the
   dialog (script, `"await":false`): `ui_click {"target":{"label":"Filament presets(.zip)","within":"Export Preset Bundle"}}`
   → `ui_input {"target":{"name":"<preset>","within":"Export Preset Bundle"},"value":true}` →
   `dialog_respond {"button":"ok"}` → `dialog_respond {"dialog":{"title":"Info"},"button":"ok"}`.
 - Preferences: read `get_settings {"scope":"preferences","keys":["export_statistics"]}`; change in the
-  dialog (script): `run_action {"id":"orca_command:open_preferences:orca","param":"developer:export_statistics"}`
+  dialog (script): `run_action {"id":"open_preferences","param":"developer:export_statistics"}`
   (`"await":false`) → `ui_input {"target":{"name":"export_statistics","within":"Preferences"},"value":true}`
   → `dialog_respond {"dialog":{"title":"Preferences"},"button":"close"}`. Checkboxes and fields save;
   most drop-down lists don't.
@@ -82,15 +85,16 @@ Contour `external`, Painted only `none`, noise `"perlin"`; overhang 50–75 % `o
 - `select_preset` printer silently changes process and filaments: re-read `get_state.presets`.
 - `new_project {"discard_changes":true}` keeps modified presets (its reply lists them under
   `modified`); add `"changes":"discard"` to drop them.
-- Uninstalled system presets are refused ("does not offer"); `list_presets {"include_hidden":true}`
-  shows them with `visible: false`.
+- `list_presets` leaves out presets that aren't installed unless `"include_hidden":true`; a name that
+  isn't there at all, or a preset that doesn't suit the selected printer, is refused with that reason.
+- A key of another scope is refused, naming the scope to pass (`"k" is a filament setting`).
 - PETG on the X1C's default Cool Plate fails to slice: set Textured PEI first. PETG + a PLA support
   filament fails ("nozzle temperatures are incompatible") unless the preference
   `enable_high_low_temp_mixed_printing` is on.
 
 ## Not possible
 
-Installing system printers or filaments, or the setup wizard's choices (its page takes
-`webview_eval` after `run_action {"id":"orca_command:help_setup_wizard:orca"}`, but no recipe is
-verified); selecting hidden presets by name (on Bambu printers the nozzle combo above reaches other
-nozzle variants); writing preferences without the dialog.
+Installing system printers or filaments for good, or the setup wizard's choices (its page opens with
+`run_action {"id":"help_setup_wizard"}` and its elements are `ui_snapshot` items that `ui_click` and
+`ui_input` take by `{"web":"Next"}` locators, but no recipe is verified); writing preferences without
+the dialog.

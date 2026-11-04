@@ -2,9 +2,9 @@
 
 ## Recipes
 
-- Filament slots: `run_action {"id":"orca_command:filament_add:orca"}` (the message names the new
+- Filament slots: `run_action {"id":"filament_add"}` (the message names the new
   slot; it copies the last slot's preset) → `select_preset {"type":"filament","name":"…","filament_slot":2}`.
-  Delete: `run_action {"id":"orca_command:filament_delete:orca","param":"2"}` (1-based; objects on it
+  Delete: `run_action {"id":"filament_delete","param":"2"}` (1-based; objects on it
   move). [ref]
 - Object or part filament: `set_settings {"scope":"object","object":1,"values":{"extruder":2}}`;
   a part `{"scope":"volume","object":0,"volume":1,"values":{"extruder":2}}`; `0`/`null` = Default.

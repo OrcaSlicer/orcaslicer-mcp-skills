@@ -1,6 +1,6 @@
 {
   "name": "orcaslicer-mcp-skills",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Drive OrcaSlicer through its MCP server: load and arrange models, change settings and presets, supports, multi-colour, gizmos, calibration, the Design (CAD) tab, slicing and export.",
   "author": {
     "name": "OrcaSlicer",
