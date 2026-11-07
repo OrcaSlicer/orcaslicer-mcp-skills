@@ -45,9 +45,9 @@ installed plugins with an Activate checkbox, version, source (Local, Subscribed,
   below have tabs Plugin Info, Description, Config (each capability's JSON configuration), Changelog,
   Diagnostics (the load error) and Permissions.
 - `run_action {"id":"refresh_plugins"}` rescans the plugin folders (notification "Plugins refreshed."),
-  but a Plugins dialog that is already open doesn't show the result: press its own Refresh,
-  `ui_click {"target":{"css":"#refresh_btn","within":"Plugins"}}`. [ref] A row's version can lag after
-  an edit; what runs is the code its last activation loaded.
+  and an open Plugins dialog shows the result. A Local row's version is its file's as of the last
+  refresh or activation, and a Subscribed row's is the release installed from the cloud; the code that
+  runs is what the last activation loaded.
 
 ## Permission prompts
 
@@ -151,11 +151,16 @@ the guide and `python_api` differ, `python_api` describes the running build.
 
 ## Install, run, change, debug
 
-1. Write `<datadir>/orca_plugins/<key>/<key>.py`, then `run_action {"id":"refresh_plugins"}` and
-   `run_action {"id":"open_plugins"}` (with the dialog already open, press its Refresh instead). The
-   new plugin is listed Inactive. [ref] With no file tools of your own, write it from `run_python`
-   (`os.makedirs`, `open(path, "w")`), which may write there. [ref] Never use the Speed Dial's Install
-   Local Plugin: its file picker can't be filled in.
+1. Install it from a file anywhere:
+   `run_action {"id":"install_local_plugin","param":"<absolute path of the .py or .whl>"}` copies it to
+   `<datadir>/orca_plugins/<file name>/` (`orca_plugins/tallest_object.py/tallest_object.py`); later
+   edits go to that copy. The reply's message names the plugin, or the call fails saying why, such as a
+   `.py` with no `name` in its `[tool.orcaslicer.plugin]` table. Replacing an installed plugin asks
+   "Overwrite Plugin" first: the reply is `blocked_by_dialog`; `dialog_respond {"button":"Overwrite"}`,
+   then `wait {"for":"job","job":"<job>"}` for the result. [ref] Or write
+   `<datadir>/orca_plugins/<key>/<key>.py` yourself and `run_action {"id":"refresh_plugins"}`. Either way
+   `run_action {"id":"open_plugins"}` then lists it Inactive. [ref] With no file tools of your own, write
+   the file from `run_python` (`os.makedirs`, `open(path, "w")`). [ref]
 2. Tick its checkbox (above). Answer the prompts its `register_operation` and `request_permissions`
    calls open (`get_state.dialogs`; the tick's reply lists the first). [ref]
 3. Run it: `run_action {"id":"Report tallest"}` → read `get_state.notifications`;
@@ -165,6 +170,8 @@ the guide and `python_api` differ, `python_api` describes the running build.
 4. **After an edit**, untick and tick it again in the Plugins dialog: a loaded plugin keeps the code it
    loaded with. Saved grants aren't asked again, an operation's included when its description
    changed. [ref] Reinstalling instead leaves the plugin Inactive and asks every permission again.
+   A wheel's load reuses the copy extracted when it first loaded, so install a new build of it with
+   `install_local_plugin` instead. Don't edit a Subscribed plugin's files: a cloud update replaces them.
 5. **Debugging:**
    - Status Error after ticking: `get_log {"level":"error"}` has
      `[load_plugin_impl] FAIL plugin=<key> error=<the exception>`. [ref]
@@ -179,6 +186,6 @@ the guide and `python_api` differ, `python_api` describes the running build.
 
 ## Not possible
 
-Installing from a file with the Speed Dial's Install Local Plugin: it opens a file picker, which a tool
-can only cancel; copy the plugin into the plugin folder instead. Browsing and subscribing to cloud
-plugins needs the person signed in to Orca Cloud, in the plugin browser.
+Browsing and subscribing to cloud plugins needs the person signed in to Orca Cloud, in the plugin
+browser. `install_local_plugin` without a path, and the Plugins dialog's own Install local plugin, open a
+file picker, which a tool can only cancel: give the command the path.
