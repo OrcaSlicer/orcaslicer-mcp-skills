@@ -79,26 +79,30 @@ Talk to the app in two ways:
 
 ## Script format
 
-```jsonc
-{ "orca_script": 1, "name": "repro #12345",
-  "vars": {"model": "${script_dir}/part.3mf"},          // ${vars.model} below
-  "steps": [
-    {"tool": "dialog_auto_answer", "args": {"rules": [{"match": "unsaved", "button": "no"}]}},
-    {"tool": "open_files", "args": {"paths": ["${vars.model}"], "discard_changes": true}},
-    {"tool": "set_settings", "args": {"scope": "print", "values": {"wall_loops": 3}}},
-    {"tool": "slice", "expect": {"/plates/0/outcome": {"eq": "ok"}}},
-    {"tool": "set_view", "args": {"tab": "preview", "camera": "iso"}},
-    {"tool": "screenshot", "args": {"target": "canvas", "save_path": "${out_dir}/after.png", "overwrite": true}}
-  ]}
+The script format (steps, placeholders, `expect`, `await`/`save_as`, `optional`, the result) is in
+`references/scripts.md`. A repro script starts from a known scene (`open_files` with
+`discard_changes`), ends with the `expect`s that hold once the bug is fixed, and keeps its files beside
+it as `${script_dir}/…`. A `.py` given to `run-script`/`--mcp-script` runs as a Python file run
+(`references/python.md`).
+
+## Plugins in a test instance
+
+To load a plugin in a harness instance without its prompts, side-load it before the launch as
+`tools/mcp/test_plugin_tools.py` does: copy it to `<datadir>/orca_plugins/<key>/<key>.py` and write
+`<datadir>/orca_plugins/<key>/.install_state.json`:
+
+```json
+{"installed_from": "local", "installed_version": "1.0.0", "plugin_name": "<name>", "enabled": true,
+ "capabilities": [{"<capability name>": true}],
+ "permissions": {"threading": true, "tools": true, "operations": ["<operation>"]}}
 ```
 
-Placeholders: `${script_dir}`, `${out_dir}`, `${env:NAME}`, `${vars.NAME}`, `${jobs.NAME}`. A step
-that returns a job is awaited (up to `timeout_s`, default 120) before its `expect`. For a dialog the
-step opens: `"await": false, "save_as": "x"`, the answering steps, then
-`{"tool": "wait", "args": {"for": "job", "job": "${jobs.x}"}}`. `expect` maps a JSON pointer to
-matchers `eq ne gt ge lt le contains regex exists empty`. `"optional": true` lets a step fail; the
-test scripts use it for refusals, followed by a check that nothing changed. A script's
-`dialog_auto_answer` rules end with it. `run_script {"path":…,"vars":{…}}` overrides `vars`.
+`threading`, `tools` and `full_access` are booleans; `fs_read`, `fs_readwrite`, `network_http`,
+`network_socket`, `process`, `events` and `operations` are lists. A running instance loads one through
+the Plugins dialog instead (`references/plugins.md`). `tools/mcp/tests/plugins/` holds the fixture
+plugins the harness tests use: `mcp_tools_fixture` (tool calls from a plugin, an operation),
+`mcp_web_fixture` (every kind of page control, in a dialog, a window, a dock panel and a config page)
+and `mcp_tools_broken` (a load that fails).
 
 ## Rules the GUI tools follow
 
@@ -108,9 +112,11 @@ test scripts use it for refusals, followed by a check that nothing changed. A sc
   fill), other changes are refused; `wait` for its job or `cancel` it. A job a person started (typing
   in the Text gizmo) refuses changes too; reads still answer.
 - A Speed Dial command that did nothing is an error with the reason.
-- Native dialogs (message boxes, file pickers) can't be clicked: register `dialog_auto_answer` before
-  the step that opens them (a picker can only be cancelled; its text is its prompt). wx dialogs take
-  `dialog_respond` or an auto-answer, which presses the button and runs its handler.
+- wx dialogs take `dialog_respond` or an auto-answer, which presses the button and runs its handler;
+  their `message` reads their controls (SKILL.md, "Dialogs"). A native message box takes
+  `dialog_respond` on Windows and Linux. A file or folder picker, and any native dialog on macOS, only
+  takes a `dialog_auto_answer` rule registered before the step that opens it (a picker can only be
+  cancelled; its text is its prompt).
 - Web pages (the setup wizard, sign-in, web dialogs, plugin windows and dock panels) are driven like
   widgets: `ui_snapshot` lists each shown page's elements under its web view, and `ui_click`,
   `ui_input` and `ui_key` take them by ref or by `{"web":"Next","kind":"button","css":"#id","within":…}`.

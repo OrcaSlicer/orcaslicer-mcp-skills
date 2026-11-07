@@ -1,19 +1,53 @@
 # Python scripts
 
-`run_python` runs Python inside OrcaSlicer against `orca.host`, the plugin API, and calls the MCP tools
-through `orca.host.tools.call(name, args)`. Use it to compute over objects, meshes and settings, or to
-make the same calls over many objects in one round trip. A part to model is a Design tab job
-(`references/cad.md`), not a mesh a script writes.
+`run_python` runs Python inside OrcaSlicer as a main program (`__name__ == "__main__"`) against `orca`,
+the plugin API: it reads the project's objects, meshes and presets, opens windows and progress dialogs
+for the person, and calls these same MCP tools through `orca.host.tools.call(name, args)`, each with its
+guards, undo and reply. Use it to compute over objects, meshes and settings, to make the same calls over
+many objects in one round trip, or for a macro that asks the person something in a window. A part to model
+is a Design tab job (`references/cad.md`); a command the user wants to keep in the app is a plugin
+(`references/plugins.md`); a fixed list of tool calls to replay is a JSON script (`references/scripts.md`).
 
 ## Before the first run
 
 - `get_state.python.scripts_allowed` must be true. Only the person can turn it on, in Preferences >
   AI features > Python scripts, since scripts run with OrcaSlicer's full access to the computer. When it
-  is off, ask them or do the work with tools.
+  is off, ask them or do the work with tools. (`python.available` false: this build has no Python.)
 - Look the API up: `python_api {"query":"mesh vertices"}` gives classes and members with their
   signature and documentation, best match first. Read the signature: `name` and `size` are properties
   (`o.name`, `bbox.size[2]`), `object(i)`, `bounding_box()` and `vertices()` are methods. Its reply's
   `numpy` says whether numpy is installed; mesh and matrix arrays need it.
+
+## Two kinds of run
+
+| | code sent as text | a file run |
+|---|---|---|
+| call | `run_python {"code":"…","args":{…}}` | `run_python {"code":"<the file's text>","filename":"/abs/x.py"}`, `filename` naming that existing file |
+| `args` / `result` | `args` holds what you pass; `result`, if set, must be a JSON value or the run is `raised` | the same, except a `result` that isn't JSON is no result (the output says so) |
+| `__file__`, `sys.argv` | none, `['']` | the path, `[path]` |
+| modules beside it | not importable | `import helper` loads `helper.py` from its folder, afresh each run |
+| PEP 723 `dependencies` | ignored | installed before the code runs (numpy, requests…) |
+| `orca.host.plugin.storage()` | raises `RuntimeError` | the file's folder |
+
+The reply is `{status, result, output, traceback?, message?}`: `status` is `finished`, `raised` (with
+`traceback` and `message`), `cancelled` or `timed_out` (`timeout_s`, default 300, at most 3600). `print()`
+comes back as `output`. A run that outlasts the reply budget replies `{"status":"running","job":"jN"}`:
+`wait {"for":"job","job":"jN"}` (repeat it); `cancel {"job":"jN"}` stops it.
+
+## The API at a glance
+
+`python_api` has every member with its documentation; these are the entry points.
+
+| Need | Call |
+|---|---|
+| Objects | `m = orca.host.model()`; `m.object_count()`, `m.object(i)` → `name`, `bounding_box()` (`.size`, `.min`, `.max`, mm tuples), `volume(i)`, `instance(i)`, `config_value(key)` (its override, `None` when unset) |
+| Meshes | `volume.mesh()` → `vertex_count()`, `vertex(i)`, `triangle(i)` without numpy; `vertices()`, `triangles()`, `face_normals()` as numpy arrays, in the part's own coordinates |
+| Placement | `instance.offset()`, `rotation()`, `scaling_factor()`, `mirror()` tuples; `instance.matrix() @ volume.matrix()` (numpy) maps mesh to world |
+| Preset values | `b = orca.host.preset_bundle()`; `b.full_config_value(key)` (the merged settings slicing uses), `b.current_process_preset()`, `b.current_printer_preset()`, `b.current_filament_presets()`, each `config_value(key)`; values are strings |
+| Change settings | `orca.host.tools.call("set_settings", {...})`, as an agent does; or `orca.host.preset.process.update(key, "value")` (`.printer`, and `.filament.update(slot, key, value)` for a 1-based slot), the edit path the GUI's fields take |
+| Tools | `orca.host.tools.call(name, args)` → the reply as a dict; `orca.host.tools.run_script(script, vars)` runs a JSON script (`references/scripts.md`); a failed call raises `orca.host.tools.ToolError` (`str(e)` its message, `e.details` its data) |
+| Ask the person | `orca.host.ui.message(text, title, buttons="yes_no", icon="question")` → `"yes"`…; `create_window(html, title, width, height, on_message=…)` (modeless by default); `create_progress_dialog(title, message, maximum)` → `update(value, message)`; `push_notification(orca.host.ui.NotificationLevel.RegularNotificationLevel, text)` |
+| The project | `orca.host.plater()`: `project_path()`, `is_project_dirty()`, `is_presets_dirty()`, `export_3mf_copy(path)` |
 
 ## Recipes
 
@@ -25,7 +59,7 @@ make the same calls over many objects in one round trip. A part to model is a De
   t.call("new_project", {"discard_changes": True})
   for i in range(args["n"]):
       t.call("run_action", {"id": "add_primitive_cube", "param": f"10 10 {5 * (i + 1)}"})
-      t.call("select", {"none": True})
+      t.call("select", {"none": True})       # a primitive is refused while something is selected
   t.call("arrange", {})
   m = orca.host.model()
   result = [[m.object(i).name, m.object(i).bounding_box().size[2]] for i in range(m.object_count())]
@@ -33,16 +67,9 @@ make the same calls over many objects in one round trip. A part to model is a De
 
   sent as `run_python {"code":"<the code>","args":{"n":3}}` →
   `{"status":"finished","result":[["Cube",5.0],["Cube",10.0],["Cube",15.0]],"output":""}`.
-  - `args` holds what you pass; set `result` to a JSON value to return it; `print()` comes back as
-    `output`.
-  - `status` is `finished`, `raised` (with `traceback` and `message`), `cancelled` or `timed_out`
-    (`timeout_s`, default 300).
-  - A tool call from Python has your guards, undo and reply; a failed one raises
-    `orca.host.tools.ToolError` (`str()` is its message). One that returns a job:
-    `t.call("wait", {"for": "job", "job": r["job"]})`.
+  A call that returns a job: `t.call("wait", {"for": "job", "job": r["job"]})`.
 - Mesh data with numpy when `python_api` says `"numpy": false`: write the script to a file that starts
-  with a PEP 723 block, and send its text with the file's path as `filename`, which makes it a file run
-  that installs the dependencies first: [ref]
+  with a PEP 723 block and send it as a file run, which installs the dependencies first: [ref]
 
   ```python
   # /// script
@@ -55,20 +82,53 @@ make the same calls over many objects in one round trip. A part to model is a De
             for i in range(m.object_count())]
   ```
 
-  `run_python {"code":"<the file's text>","filename":"/abs/heights.py"}`. Vertices are in the part's
-  own mesh coordinates; world ones are `instance.matrix() @ volume.matrix()` applied to them.
+  `run_python {"code":"<the file's text>","filename":"/abs/heights.py"}`.
+- A macro that asks the person in a window, then acts: [ref]
+
+  ```python
+  import queue
+  import orca
+
+  def main():
+      answers = queue.Queue()
+      orca.host.ui.create_window(
+          "<input id='h' value='12'> <button onclick=\"window.orca.postMessage({h: "
+          "document.getElementById('h').value})\">Go</button>",
+          title="Cube height", width=300, height=160, on_message=answers.put)
+      h = float(answers.get()["h"])          # waits until the person presses Go
+      orca.host.tools.call("select", {"none": True})
+      orca.host.tools.call("run_action", {"id": "add_primitive_cube", "param": f"10 10 {h}"})
+      global result
+      result = {"height": h}
+
+  if __name__ == "__main__":
+      main()
+  ```
+
+  The window's callback runs on the UI thread, where tool calls are refused, so it hands the message to
+  the script's own code through a queue. The `run_python` call replies `running` while the window waits;
+  the person (or you, for a test: `ui_input {"target":{"css":"#h","within":"Cube height"},"value":"18"}`,
+  `ui_click {"target":{"web":"Go","within":"Cube height"}}`) answers it, then `wait` for the job. The
+  run's windows close when it ends.
 
 ## Traps
 
 - A script that raised keeps what it changed before the error: read the state (`list_objects`) before
   running it again.
-- While a modal dialog is open, tool calls raise "A modal dialog is open": answer it first
-  (`get_state.dialogs`, `dialog_respond`), outside the script.
-- The code runs on a worker thread: calls documented as UI thread only raise `RuntimeError`.
+- While a modal dialog is open, tool calls that change the project raise "A modal dialog is open":
+  answer it first (`get_state.dialogs`, `dialog_respond`), outside the script. That includes a modal
+  window the script opened itself, so interactive macros use modeless windows.
+- The code runs on a worker thread: calls documented as UI thread only (`orca.host.app_info()`) raise
+  `RuntimeError`. Window callbacks run on the UI thread and can't call the tools.
+- The run ends once its code and the non-daemon threads and pool tasks it started are done; their tool
+  calls work while it lasts. `wait {"for":"idle"}` does not wait for a `run_python` run, only for the
+  calls it makes: wait for its job instead.
+- A `result` set inside a function needs `global result`.
 - Objects from `orca.host.model()` are references into the live project: fetch them again after a call
   that changes it (arrange, split and delete renumber objects).
+- Overlapping runs share `sys.modules`: give helper modules distinctive names.
 - `export_script` records a run as one step with its code, which a replay runs again against the
-  project as it is then.
+  project as it is then; its own tool calls are not recorded.
 
 ## Not possible
 

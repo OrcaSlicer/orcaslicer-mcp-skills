@@ -6,8 +6,9 @@ Generated from `list_actions`; prefer a typed tool where one exists (`calibrate`
 value as a string. A `path` param skips the file dialog: an absolute path for inputs, the JSON string
 `{"path": "/abs/out", "overwrite": true}` for outputs. `list_actions {"query": "..."}` searches them with each
 param's help. Object commands act on what `select` picked, and one that did nothing (nothing selected) is an
-error. Actions without a param that open a dialog return `blocked_by_dialog`. Left out: the Help and Plugins
-groups except the setup wizard, and the person's own Run Script, Start/Stop Recording and Take Screenshot
+error. Actions without a param that open a dialog return `blocked_by_dialog`. Left out: the Help group
+except the setup wizard; the Plugins group and the commands installed plugins add, which
+`references/plugins.md` covers; and the person's own Run Script, Start/Stop Recording and Take Screenshot
 commands (agents use `run_script`, `start_recording`, `stop_recording` and `screenshot`).
 
 ## Add Handy models
