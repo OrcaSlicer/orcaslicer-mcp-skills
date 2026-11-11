@@ -29,7 +29,8 @@
 - Pause, custom G-code, filament change at a layer (slice first; slice again before export):
   `set_custom_gcode_at_layer {"add":[{"layer":26,"type":"pause"},{"z":10.2,"type":"custom","gcode":"M104 S215"},
   {"layer":60,"type":"change_filament","filament":2}]}`. `layer` is the slider's 1-based number, `z`
-  the layer whose top is at or above it; the reply and `list_plates` `layer_gcode` give both.
+  the layer whose top is at or above it; the reply gives both, and `list_plates` `layer_gcode` gives
+  `z`, with `layer` once the plate is sliced again.
   `"remove":[{"layer":26}]`, `"clear":true`. [ref]
 - Manual swap on a single-extruder printer (M600): one slot and
   `set_custom_gcode_at_layer {"add":[{"z":15,"type":"custom","gcode":"M600"}]}`. A `change_filament` with two

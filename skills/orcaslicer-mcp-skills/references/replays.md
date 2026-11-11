@@ -45,8 +45,9 @@ run a replay too.
 
 The reply, also written to `<out_dir>/result.json`:
 `{passed, name, failed_step, steps:[{index, tool, args, ok, duration_ms, result | error, expect_failure, reason}], out_dir, result_file}`.
-A failed step's `reason` says why: `tool` (the tool's own error), `expect {pointer, op, expected,
-actual}`, `timeout`, `cancelled`, `placeholder`, `missing_job`. `run_replay` itself returns a job when
+A failed step's `reason.kind` says why: `tool` (the tool's own error), `expect` (with `pointer`, `op`,
+`expected`, `actual`), `expect_invalid`, `python` (a `run_script` step that raised, was cancelled or
+timed out), `timeout`, `cancelled`, `placeholder`, `missing_job`. `run_replay` itself returns a job when
 the run outlasts the reply budget: `wait` for it.
 
 ## Recipes

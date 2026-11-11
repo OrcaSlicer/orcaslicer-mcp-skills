@@ -9,10 +9,10 @@
 - Which setting controls something: `get_settings {"query":"ooze travel"}`, a few distinctive words
   matched in keys, labels and descriptions, best first (20 unless `limit`; `"scope":"filament"` narrows
   it). [ref] Read another preset without selecting it: `"scope":"process","preset":"0.16mm Optimal @BBL X1C"`.
-- Whole view for tuning: `get_settings {"where":"?"}` answers with every page > group of the process
-  (`"scope":"filament"` or `"printer"` for theirs); `{"where":"Strength > Infill"}` returns that group in
-  full. Read groups: a whole page (`"where":"Quality"`) can exceed what the client keeps in the
-  conversation. [ref]
+- Whole view for tuning: `get_settings {"where":"?"}` names no group, so its error lists every
+  page > group of the process in `groups` (`"scope":"filament"` or `"printer"` for theirs);
+  `{"where":"Strength > Infill"}` returns that group in full. Read groups: a whole page
+  (`"where":"Quality"`) can exceed what the client keeps in the conversation. [ref]
 - Edit: `set_settings {"scope":"process"|"filament"|"printer","values":{...}}`; a filament slot's preset
   `"filament_slot":2`. The reply's `applied` and `changed` (the app's own adjustments included). [ref]
 - Per-variant values (meta lists `variants` and `active`, e.g. X1C speeds and temperatures "Direct

@@ -62,9 +62,10 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
     and printer settings. Each item has its `scope` (the one `set_settings` needs), its value, and in
     `meta` the label, `description` (the full tooltip), `where` (page > group) and enum `values` with
     their `labels` (write the value). Check it before changing a setting you don't know.
-  - Tuning (stronger, faster, less stringing): `get_settings {"where":"?"}` lists the process's
-    page > group names; read the groups involved in full with `{"where":"Strength > Walls"}` (a group,
-    not a whole page; add `"scope":"filament"` or `"printer"` for theirs).
+  - Tuning (stronger, faster, less stringing): `get_settings {"where":"?"}` names no group, so its
+    error lists the process's page > group names (`groups`); read the groups involved in full with
+    `{"where":"Strength > Walls"}` (a group, not a whole page; add `"scope":"filament"` or `"printer"`
+    for theirs).
   - `set_settings {"scope":"process"|"filament"|"printer","values":{...}}`, many keys per call; a key of
     another scope is refused, naming it. Other scopes: `"object","object":N` and
     `"part","object":N,"part":M` (overrides; `extruder` is the filament), `"project"` (plate type,

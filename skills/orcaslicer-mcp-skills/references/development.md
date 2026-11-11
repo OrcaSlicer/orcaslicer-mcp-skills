@@ -68,8 +68,8 @@ Talk to the app in two ways:
 8. `screenshot {"target":"canvas","save_path":"/abs/work/before.png","overwrite":true}`; `"main"`,
    `"dialog"`, a window's ref from `list_windows`, or a widget's locator. Read the full-size PNG to
    look closer.
-9. `export_replay {"path":"/abs/work/repro.json"}`. Failed calls are left out, a job that failed
-   later included; a call whose job still runs is left out and named in `left_out_running` (wait,
+9. `export_replay {"path":"/abs/work/repro.json"}`. Calls that failed are left out, whether at once
+   or as a job later; a call whose job still runs is left out and named in `left_out_running` (wait,
    export again). `export_replay {"clear":true}` at the start drops exploration. Then edit it: add
    `expect`s that hold once the bug is fixed, rename the screenshot to `after.png`, use
    `${replay_dir}/…` for files kept beside it.
@@ -156,9 +156,9 @@ CAD tool's examples) and the Design tab's GUI tests `test_cad_sketching.py`, `te
 and `test_cad_context_menu.py`.
 `test_web_ui.py` drives a fixture plugin's pages: `test_web_ui.py --install DIR`, launch with
 `--datadir DIR`, then run it. `test_plugin_tools.py` (a plugin's calls into the tools) launches its own
-instances. Unit tests:
-`tests/slic3rutils/test_mcp_*.cpp` (`ctest --test-dir ./tests/slic3rutils -C Release`), tags `[Mcp]`,
-`[Mcp][CAD]`.
+instances, and `test_orca_mcp_attach.py` (how the harness attaches to a running app) needs none.
+Unit tests: `tests/slic3rutils/test_mcp_*.cpp` (`ctest --test-dir ./tests/slic3rutils -C Release`),
+tags `[Mcp]`, `[Mcp][CAD]`.
 
 A new feature MCP should reach: a Speed Dial command in `NativeCommands.cpp` (key, description,
 `Path` param that skips its dialog) is enough for most; a typed tool in the matching
@@ -187,10 +187,13 @@ feature reachable").
   exact everywhere, or launch with `GDK_BACKEND=x11`.
 - On X11 OrcaSlicer's own popups are drawn into the capture; another application's window over it
   comes out black (`approximate`). A private display has nothing else on it.
-- Record videos under X11 too, since a Wayland recording leaves dialogs out:
+- Record videos under X11 too, where a recording shows the app's windows as they are on the screen:
   `orca_mcp.py launch --headless --width 1920 --height 1080` (`--xvfb` without a desktop), then
   `set_window {"position":[0,0],"size":[1920,1080]}` before `start_recording` so the window fills the
   screen. A dialog's title bar, drawn by the compositor, is not in the video; its contents are.
+  Under Wayland a recording draws each dialog centred on the window it was opened from, where the
+  compositor usually puts it, and leaves out modeless windows and native dialogs (message boxes, file
+  pickers); `stop_recording`'s `note` says so.
 - Launching by hand on a fresh datadir: set `SSL_CERT_FILE` (the harness does), or a CA-bundle
   prompt blocks startup.
 

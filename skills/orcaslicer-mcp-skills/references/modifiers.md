@@ -45,8 +45,8 @@
 
 - `list_objects` part `bbox`, `position` and `scaled_volume` are on the bed (instance 0); an object's
   `bbox` counts model parts only, not modifiers or negative parts.
-- A single-part object has no part row: an `extruder` set on its `"part":0` is the object's (the
-  reply notes it); use the object scope.
+- A single-part object's filament is the object's: an `extruder` set on its `"part":0` goes to the
+  object (the reply's `note` says so); use the object scope.
 - `mouse_gesture` points on modifiers and negative parts are targets like any part.
 
 ## Not possible

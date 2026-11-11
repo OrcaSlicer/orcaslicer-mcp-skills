@@ -47,7 +47,7 @@ comes back as `output`. A run that outlasts the reply budget replies `{"status":
 | Change settings | `orca.host.tools.call("set_settings", {...})`, as an agent does; or `orca.host.preset.process.update(key, "value")` (`.printer`, and `.filament.update(slot, key, value)` for a 1-based slot), the edit path the GUI's fields take |
 | Tools | `orca.host.tools.call(name, args)` → the reply as a dict; `orca.host.tools.run_replay(replay, vars)` runs a replay (`references/replays.md`); a failed call raises `orca.host.tools.ToolError` (`str(e)` its message, `e.details` its data) |
 | Ask the person | `orca.host.ui.message(text, title, buttons="yes_no", icon="question")` → `"yes"`…; `create_window(html, title, width, height, on_message=…)` (modeless by default); `create_progress_dialog(title, message, maximum)` → `update(value, message)`; `push_notification(orca.host.ui.NotificationLevel.RegularNotificationLevel, text)` |
-| The project | `orca.host.plater()`: `project_path()`, `is_project_dirty()`, `is_presets_dirty()`, `export_3mf_copy(path)` |
+| The project | `orca.host.plater()`: `is_project_dirty()`, `is_presets_dirty()`. Its `project_path()` and `export_3mf_copy(path)` are UI thread only, so a script reads the path from `orca.host.tools.call("get_app_state", {})["project"]["path"]` and writes a copy with the `export` tool (`"format":"3mf"`) |
 
 ## Recipes
 
@@ -118,8 +118,9 @@ comes back as `output`. A run that outlasts the reply budget replies `{"status":
 - While a modal dialog is open, tool calls that change the project raise "A modal dialog is open":
   answer it first (`get_app_state.dialogs`, `answer_dialog`), outside the script. That includes a modal
   window the script opened itself, so interactive macros use modeless windows.
-- The code runs on a worker thread: calls documented as UI thread only (`orca.host.app_info()`) raise
-  `RuntimeError`. Window callbacks run on the UI thread and can't call the tools.
+- The code runs on a worker thread: calls documented as UI thread only (`orca.host.app_info()`,
+  `orca.host.plater().project_path()`) raise `RuntimeError`. Window callbacks run on the UI thread and
+  can't call the tools.
 - The run ends once its code and the non-daemon threads and pool tasks it started are done; their tool
   calls work while it lasts. `wait {"for":"idle"}` does not wait for a `run_script` run, only for the
   calls it makes: wait for its job instead.
