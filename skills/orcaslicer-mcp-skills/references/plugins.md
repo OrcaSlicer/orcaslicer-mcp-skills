@@ -52,14 +52,14 @@ installed plugins with an Activate checkbox, version, source (Local, Subscribed,
 ## Permission prompts
 
 A plugin asks before it reads or writes files outside OrcaSlicer's folders, connects to the network,
-starts a program or a thread, calls the MCP tools, or offers an operation. The prompt is a modal dialog
-titled "Plugin permissions" or "Plugin permission request", whose `message` names what it asks
+or starts a program or a thread. The prompt is a modal dialog titled "Plugin permissions" or
+"Plugin permission request", whose `message` names what it asks
 (`get_app_state.dialogs`); `answer_dialog {"button":"yes"|"no"}` answers it on every platform. [ref]
 
 - These answers protect the person's computer and are saved with the plugin (shown on its Permissions
   tab): ask the user before pressing Yes, unless it is your own plugin in a throwaway test data folder.
 - No denies that access: the plugin's call raises `PermissionError`, or for a load-time request the
-  plugin fails to load (an operation that was refused is just not offered).
+  plugin fails to load.
 - The Permissions tab lists a plugin's saved permissions, where the person adds, removes or grants
   Full access. Reinstalling or updating a plugin clears them.
 
@@ -132,15 +132,14 @@ Capability bases (each needs `get_name()`; look the rest up with `search_python_
 - **Configuration:** `get_default_config()` returns a dict; `json.loads(self.get_config())` reads the
   saved one, `self.save_config(json.dumps(cfg))` writes it; the person edits it on the Config tab.
 - **Permissions** are declared in `register_capabilities()`:
-  `orca.request_permissions(fs_read=[…], fs_readwrite=["/abs/dir/*"], network=["https://host"], process=[…], threading=True, tools=True)`
-  shows one prompt at load (No fails the load), except `tools=True`, which asks on its own and
-  leaves the plugin loading without it when refused. Declare what the plugin needs there: an
+  `orca.request_permissions(fs_read=[…], fs_readwrite=["/abs/dir/*"], network=["https://host"], process=[…], threading=True)`
+  shows one prompt at load (No fails the load). Declare what the plugin needs there: an
   undeclared access in a script's `execute()` or a thread raises `PermissionError` at once and opens a
   prompt whose Yes lets the next attempt through. [ref]
 - **The host API** is `orca.host`, as for scripts (`references/python.md`): model, meshes, presets,
   `orca.host.ui` windows, dock panels, progress dialogs and notifications, `orca.host.plugin.storage()`
   (the plugin's folder). Never import another GUI toolkit (tkinter, Qt, wx).
-- **Tool calls from a plugin** (`orca.host.tools.call`) need `tools=True` and come from `execute()` or a
+- **Tool calls from a plugin** (`orca.host.tools.call`) need no permission and come from `execute()` or a
   thread it starts, never from a window callback or the UI thread; `export_replay` is refused to it.
 - A wheel plugin (`.whl` as the folder's entry file) takes its name and version from the wheel's
   `METADATA` instead of the PEP 723 block, for plugins with several modules or files.
@@ -161,15 +160,15 @@ the guide and `search_python_api` differ, `search_python_api` describes the runn
    `<datadir>/orca_plugins/<key>/<key>.py` yourself and `run_action {"id":"refresh_plugins"}`. Either way
    `run_action {"id":"open_plugins"}` then lists it Inactive. [ref] With no file tools of your own, write
    the file from `run_script` (`os.makedirs`, `open(path, "w")`). [ref]
-2. Tick its checkbox (above). Answer the prompts its `register_operation` and `request_permissions`
-   calls open (`get_app_state.dialogs`; the tick's reply lists the first). [ref]
+2. Tick its checkbox (above). Answer the prompt its `request_permissions` call opens
+   (`get_app_state.dialogs`; the tick's reply lists it). [ref]
 3. Run it: `run_action {"id":"Report tallest"}` → read `get_app_state.notifications`;
    `call_tool {"tool":"plugin.tallest_object.tallest","args":{}}`; for a slicing step, slice and export.
    Notifications have no id or time, so a second run with the same message looks like the first:
    check a change through an operation, or put something that changes in the message.
 4. **After an edit**, untick and tick it again in the Plugins dialog: a loaded plugin keeps the code it
-   loaded with. Saved grants aren't asked again, an operation's included when its description
-   changed. [ref] Reinstalling instead leaves the plugin Inactive and asks every permission again.
+   loaded with. Saved grants aren't asked again. [ref] Reinstalling instead leaves the plugin Inactive
+   and asks every permission again.
    A wheel's load reuses the copy extracted when it first loaded, so install a new build of it with
    `install_local_plugin` instead. Don't edit a Subscribed plugin's files: a cloud update replaces them.
 5. **Debugging:**

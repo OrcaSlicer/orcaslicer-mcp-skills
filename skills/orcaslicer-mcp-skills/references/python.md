@@ -10,9 +10,14 @@ is a Design tab job (`references/cad.md`); a command the user wants to keep in t
 
 ## Before the first run
 
-- `get_app_state.python.scripts_allowed` must be true. Only the person can turn it on, in Preferences >
-  AI features > Python scripts, since scripts run with OrcaSlicer's full access to the computer. When it
-  is off, ask them or do the work with tools. (`python.available` false: this build has no Python.)
+- A script always runs, restricted unless `get_app_state.python.scripts_unrestricted` is true. A
+  restricted script's own Python code reads and writes files only in OrcaSlicer's data folder, reads its
+  resources folder, the standard library and, in a file run, the file's folder, and can't start a thread
+  or a program or use the network: such an access raises `PermissionError`, whose message names the
+  setting. The tools it calls through `orca.host.tools` are not restricted, so export and file work goes
+  through them. Only the person can lift the restriction, in Preferences > AI features > Python scripts,
+  which lets scripts bypass the permission checks: when a script needs more, ask them.
+  (`python.available` false: this build has no Python.)
 - Look the API up: `search_python_api {"query":"mesh vertices"}` gives classes and members with their
   signature and documentation, best match first. Read the signature: `name` and `size` are properties
   (`o.name`, `bbox.size[2]`), `object(i)`, `bounding_box()` and `vertices()` are methods. Its reply's

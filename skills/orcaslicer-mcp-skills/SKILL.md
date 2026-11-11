@@ -17,8 +17,8 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
    `click`, `set_widget_value`, `mouse_gesture`, `wait`, `answer_dialog`, `auto_answer_dialogs` only
    for gizmos and dialogs: every loaded schema costs on every call.
 2. Call `get_app_state`: ready, tab, presets, objects, plates, the `selection`, open `dialogs`, the open
-   `gizmo`, `jobs`, whether Python scripts may run (`python.scripts_allowed`) and whether the Design
-   tab is on (`design_tab`).
+   `gizmo`, `jobs`, whether Python scripts run unrestricted (`python.scripts_unrestricted`) and whether
+   the Design tab is on (`design_tab`).
 3. **No OrcaSlicer tools at all** means the app is not connected: the user turns on Preferences >
    General > AI features > MCP server and adds it ("Add to an agent"); in an OrcaSlicer checkout, read
    `references/development.md`.

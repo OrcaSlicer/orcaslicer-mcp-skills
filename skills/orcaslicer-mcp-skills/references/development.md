@@ -27,9 +27,10 @@ waits until the app is ready and prints the session: `url`, `port`, `token`, `pi
 
 - `--cad` turns the Design (CAD) tab on, which `call_cad_tool` needs. The app reads it only at startup,
   so pass it on every launch, also with a reused datadir.
-- `--python-scripts` allows Python scripts (`run_script`). They run only when the datadir's
-  `OrcaSlicer.conf` has `"mcp_python_scripts": "true"` in its `app` section before the launch, which the
-  option sets; no tool turns it on. A `.py` given to `--mcp-run` runs as a Python script.
+- `--unrestricted-scripts` lets Python scripts (`run_script`) run unrestricted. Without it they run
+  restricted (`references/python.md`). It puts `"mcp_python_unrestricted": "true"` in the `app` section of
+  the datadir's `OrcaSlicer.conf` before the launch; no tool turns it on. A `.py` given to `--mcp-run`
+  runs as a Python script.
 - `--datadir DIR` reuses a datadir: pass the first launch's on every relaunch, so presets stay the
   same. Never point it at your real OrcaSlicer profile.
 - `--port N` when 13619 is taken (your own OrcaSlicer with MCP on). Several instances at once: give
