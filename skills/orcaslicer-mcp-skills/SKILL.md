@@ -44,13 +44,16 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
     `zoom` in screenshot pixels per mm.
   - `export {"format":"gcode"|"sliced_3mf"|"3mf"|"stl","path":"/abs/…","overwrite":true}`; another plate
     `"plates":N`.
-  - `select_objects {"objects":[0]}`; a part `select_objects {"volumes":[[0,1]]}`; nothing `select_objects {"none":true}`.
-  - `transform {"object":0,"scale":1.5}` (relative), `"size":[80,null,null]`, `"plate":1`, a part with `"volume":1`.
+  - `select_objects {"objects":[0]}`; a part `select_objects {"parts":[[0,1]]}`; nothing `select_objects {"none":true}`.
+  - `transform {"object":0,"scale":1.5}` (relative), `"size":[80,null,null]`, `"plate":1`, a part with `"part":1`.
   - `add_part {"object":0,"type":"negative","shape":"cylinder","size":[5,20],"position":[128,128,10]}`.
   - `auto_answer_dialogs {"rules":[{"match":"…","button":"…"}]}`; it replaces earlier rules. The regex
     is searched in the title, message and text: match a phrase (`"unsaved changes"`) or the title
     (`"^Preferences$"`), since a bare word (`"unsaved"`) also closes any dialog whose text holds it.
   - `set_widget_value` values are plain JSON (`"M5"`, `15`, `true`), never quoted twice.
+- **The scene is a tree:** `list_objects` gives `plates[i].objects[j]` and `outside` (objects on no
+  plate), each object with its `instances` and `parts`. An object's `index` and `id` are the project's,
+  whatever the plate. An "assembly" is one object with several parts (`references/scene.md`).
 - **Verify through state, not pictures:** `list_objects`, `list_plates`, `get_settings`, the `slice`
   reply, `get_slice_stats`, exported files. Take a screenshot only when the user wants an image.
 - **Settings:**
@@ -64,7 +67,7 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
     not a whole page; add `"scope":"filament"` or `"printer"` for theirs).
   - `set_settings {"scope":"process"|"filament"|"printer","values":{...}}`, many keys per call; a key of
     another scope is refused, naming it. Other scopes: `"object","object":N` and
-    `"volume","object":N,"volume":M` (overrides; `extruder` is the filament), `"project"` (plate type,
+    `"part","object":N,"part":M` (overrides; `extruder` is the filament), `"project"` (plate type,
     slot colours, flushing, prime tower), `"plate","plate":N`.
   - Percents are strings (`"25%"`). Check the reply's `applied` and `changed`.
   - A per-variant value (meta `variants`, e.g. X1C speeds): one value writes the entry in use,

@@ -7,7 +7,7 @@
   Delete: `run_action {"id":"filament_delete","param":"2"}` (1-based; objects on it
   move). [ref]
 - Object or part filament: `set_settings {"scope":"object","object":1,"values":{"extruder":2}}`;
-  a part `{"scope":"volume","object":0,"volume":1,"values":{"extruder":2}}`; `0`/`null` = Default.
+  a part `{"scope":"part","object":0,"part":1,"values":{"extruder":2}}`; `0`/`null` = Default.
   Read back: `list_objects` `filament` per object and part. [ref]
 - Slot colours, flushing, prime tower (project scope, as the sidebar's controls write them):
   `set_settings {"scope":"project","values":{"filament_colour":{"index":1,"value":"#000000"}}}`;
@@ -25,7 +25,7 @@
   `set_widget_value {"target":{"imgui_name":"Text"},"value":"ORCA"}` → `wait {"for":"idle"}` →
   `set_widget_value {"target":{"imgui":"Height"},"value":8}` → wait idle →
   `set_widget_value {"target":{"imgui":"Depth"},"value":1.5}` → wait idle → `click {"target":{"imgui":"Done"}}`
-  → `set_settings {"scope":"volume","object":0,"volume":1,"values":{"extruder":2}}`. [ref]
+  → `set_settings {"scope":"part","object":0,"part":1,"values":{"extruder":2}}`. [ref]
 - Pause, custom G-code, filament change at a layer (slice first; slice again before export):
   `set_custom_gcode_at_layer {"add":[{"layer":26,"type":"pause"},{"z":10.2,"type":"custom","gcode":"M104 S215"},
   {"layer":60,"type":"change_filament","filament":2}]}`. `layer` is the slider's 1-based number, `z`

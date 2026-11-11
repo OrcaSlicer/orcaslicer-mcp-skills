@@ -30,7 +30,7 @@
   `set_settings {"scope":"plate","plate":1,"values":{"curr_bed_type":"Cool Plate","print_sequence":"by object"}}`
   (also `spiral_mode`, `first_layer_print_sequence` `[2,1]`, `other_layers_print_sequence`
   `[{"from":2,"to":9,"order":[2,1]}]`, `name`, `locked`; `null` = Same as Global).
-  `list_plates {}` reads every plate back: `overrides`, `objects`, `sliced`, `layer_gcode`. [ref]
+  `list_plates {}` reads every plate back: `overrides`, `objects` (how many), `sliced`, `layer_gcode`. [ref]
 - Upload to OctoPrint/Moonraker/PrusaLink: `set_settings {"scope":"printer","values":
   {"host_type":"moonraker","print_host":"http://127.0.0.1:7125"}}` (`"printhost_apikey"` for
   OctoPrint; `"bbl_use_printhost":true` on a Bambu printer) → `slice {}` → in one `run_replay`:

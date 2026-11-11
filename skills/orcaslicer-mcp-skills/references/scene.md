@@ -3,6 +3,34 @@
 Typed tools first: `open_files`, `transform`, `arrange`, `list_objects`, `list_plates`, and the
 object commands of `references/actions.md`, which act on what `select_objects` picked.
 
+## How the scene is laid out
+
+`list_objects` is the Objects panel as a tree:
+
+- `plates[i]` is `{index, name, objects}`; `outside` holds the objects on no plate. `{"plate":1}` lists
+  that plate alone.
+- An object has `instances` (its placements on that plate) and `parts`. An object with instances on
+  two plates is listed under both; `total` counts it once.
+- `parts` holds everything in the object, even when that is one part: parts, negative parts,
+  modifiers, support blockers and enforcers and precise seams, told apart by `type`.
+- `index` numbers an object in the project and a part in its object, whatever the plate. Those, and
+  the `id` beside each, are what the other tools take: `"object":2`, `"part":1`, `"parts":[[2,1]]`.
+- `list_plates` has each plate's settings and how many objects are on it (`objects`).
+
+**Assembly.** When the person says "assembly" they mean one object with several parts: what Assemble
+makes from several objects (`obj_assemble`, named Assembly), what a STEP assembly opens as, and what
+the Design tab commits for several bodies. `list_objects` has no separate kind for it: it is an object
+whose `parts` has more than one entry of `type` `part`. Work with it this way:
+
+- The whole assembly: `transform {"object":N,…}`, `select_objects {"objects":[N]}`, the object scope of
+  `set_settings`.
+- One piece of it: `transform {"object":N,"part":M,…}`, `select_objects {"parts":[[N,M]]}`,
+  `set_settings {"scope":"part","object":N,"part":M,…}` for its own filament and settings.
+- Take it apart: `select_objects {"objects":[N]}` → `run_action {"id":"obj_split_objects"}`.
+
+The assemble view (`set_view {"canvas":"assemble"}`) is something else: a 3D view that shows the
+objects put together.
+
 ## Recipes
 
 - Load: `open_files {"paths":["/abs/a.stl"]}`; a `.3mf` opens as a project unless `"as":"geometry"`.

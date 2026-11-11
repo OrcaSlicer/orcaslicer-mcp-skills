@@ -40,7 +40,7 @@ comes back as `output`. A run that outlasts the reply budget replies `{"status":
 
 | Need | Call |
 |---|---|
-| Objects | `m = orca.host.model()`; `m.object_count()`, `m.object(i)` → `name`, `bounding_box()` (`.size`, `.min`, `.max`, mm tuples), `volume(i)`, `instance(i)`, `config_value(key)` (its override, `None` when unset) |
+| Objects | `m = orca.host.model()`; `m.object_count()`, `m.object(i)` → `name`, `bounding_box()` (`.size`, `.min`, `.max`, mm tuples), `volume(i)` (a part: the Python API keeps the model's word), `instance(i)`, `config_value(key)` (its override, `None` when unset) |
 | Meshes | `volume.mesh()` → `vertex_count()`, `vertex(i)`, `triangle(i)` without numpy; `vertices()`, `triangles()`, `face_normals()` as numpy arrays, in the part's own coordinates |
 | Placement | `instance.offset()`, `rotation()`, `scaling_factor()`, `mirror()` tuples; `instance.matrix() @ volume.matrix()` (numpy) maps mesh to world |
 | Preset values | `b = orca.host.preset_bundle()`; `b.full_config_value(key)` (the merged settings slicing uses), `b.current_process_preset()`, `b.current_printer_preset()`, `b.current_filament_presets()`, each `config_value(key)`; values are strings |

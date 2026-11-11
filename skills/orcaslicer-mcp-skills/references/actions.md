@@ -49,7 +49,7 @@ Screenshot commands (agents use `run_replay`, `run_script`, `start_recording`, `
 | `obj_center` |  | Center the selection on its plate. |
 | `obj_type_modifier` |  | Make the selected parts modifiers, as Change Type does; not the object's last solid part. Parts are listed by type, so part indices change. |
 | `obj_type_negative` |  | Make the selected parts negative parts, as Change Type does; not the object's last solid part. Parts are listed by type, so part indices change. |
-| `obj_type_part` |  | Make the selected parts (select_objects {volumes} first) solid parts, as Change Type does. Parts are listed by type, so part indices change. |
+| `obj_type_part` |  | Make the selected parts (select_objects {parts} first) solid parts, as Change Type does. Parts are listed by type, so part indices change. |
 | `obj_type_precise_seam` |  | Make the selected parts Center precise seams (seams keep their subtype), as Change Type does; not the object's last solid part, nor a text or SVG part. Parts are listed by type, so part indices change. |
 | `obj_type_support_blocker` |  | Make the selected parts support blockers, as Change Type does; not the object's last solid part, nor a text or SVG part. Parts are listed by type, so part indices change. |
 | `obj_type_support_enforcer` |  | Make the selected parts support enforcers, as Change Type does; not the object's last solid part, nor a text or SVG part. Parts are listed by type, so part indices change. |

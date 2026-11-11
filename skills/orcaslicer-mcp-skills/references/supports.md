@@ -12,7 +12,7 @@
 - Per object: `set_settings {"scope":"object","object":0,"values":{"enable_support":true}}`; a brim
   for one object `{"brim_type":"outer_only","brim_width":8}`; clear an override with
   `{"brim_type":null}`; no brim `"no_brim"`. [ref]
-- Support blocker or enforcer as a volume (no painting): `add_part {"object":0,"type":"support_blocker",
+- Support blocker or enforcer as a shape (no painting): `add_part {"object":0,"type":"support_blocker",
   "shape":"cube","size":[20,20,5],"position":[x,y,z]}` where `position` is the box centre on the bed;
   size it to cover the space under the overhang, from the bbox in `list_objects`.
   `"support_enforcer"` likewise. [ref]
@@ -58,5 +58,5 @@
 
 ## Not possible
 
-Typed painting or region selection (paint, or use `add_part` volumes); brim ear positions (the count
+Typed painting or region selection (paint, or use `add_part` shapes); brim ear positions (the count
 only; positions are in a saved 3MF's `Metadata/brim_ear_points.txt`).

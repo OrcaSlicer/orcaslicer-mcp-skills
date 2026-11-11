@@ -2,7 +2,7 @@
 
 Gizmos have no typed tools: drive them as a person does (icon, panel fields, clicks on the model).
 Typed neighbours: variable layer height is `set_variable_layer_height`, parts and modifiers are
-`add_part`, part filament is `set_settings` volume scope.
+`add_part`, part filament is `set_settings` part scope.
 
 ## Recipes
 
@@ -26,14 +26,14 @@ Typed neighbours: variable layer height is `set_variable_layer_height`, parts an
   `run_action {"id":"add_primitive_svg","param":"/abs/star.svg"}` → wait idle →
   `set_widget_value {"target":{"imgui":"Depth"},"value":0.6}` → `set_widget_value {"target":{"imgui":"Size"},"value":50}`
   → wait idle → `click {"target":{"gizmo":"SVG"}}` (close) →
-  `set_settings {"scope":"volume","object":0,"volume":1,"values":{"extruder":2}}` for a second colour. [ref]
+  `set_settings {"scope":"part","object":0,"part":1,"values":{"extruder":2}}` for a second colour. [ref]
 - Bake engraving: [ref]
   1. `click {"target":{"gizmo":"MeshBoolean"}}` → `click {"target":{"imgui":"Difference","index":0}}`.
   2. `click {"target":{"imgui_name":"select_source_volume"}}` →
-     `mouse_gesture {"at":{"object":0,"volume":0,"point":[x,y,z],"frame":"world"}}`.
+     `mouse_gesture {"at":{"object":0,"part":0,"point":[x,y,z],"frame":"world"}}`.
   3. `click {"target":{"imgui_name":"select_tool_volume"}}` →
-     `mouse_gesture {"at":{"object":0,"volume":1,"point":[x,y,z_top],"frame":"world"},"check":"point"}`.
-     `"volume":1` names the text part; without it the click selects the source again.
+     `mouse_gesture {"at":{"object":0,"part":1,"point":[x,y,z_top],"frame":"world"},"check":"point"}`.
+     `"part":1` names the text part; without it the click selects the source again.
   4. `set_widget_value {"target":{"imgui":"Delete input"},"value":true}` → `click {"target":{"imgui_name":"btn"}}`
      → `wait {"for":"idle"}`.
 - Measure: [ref]
@@ -123,7 +123,7 @@ only); the Measure distance as data (read the panel text).
   with `mouse_gesture` `wheel` over it.
 - Click the model at a point, not a pixel: `mouse_gesture {"at":{"object":0,"spot":"top"}}`, or
   `"point":[x,y,z]` in the part's mesh coordinates (`"frame":"world"` for scene coordinates; add
-  `"volume"` for a part, modifiers and negative parts included). It fails, naming what is in the way,
+  `"part"` for a part, modifiers and negative parts included). It fails, naming what is in the way,
   when the point is hidden, below the bed or cut away; turn the camera with `set_view` (from below the
   bed hides nothing). `"check":"point"` skips that, for a point off the surface (a cut plane).
   Strokes: `"action":"drag"` with `"waypoints"` and `"to"`. `"modifiers":["shift"]` holds Shift (Measure's
