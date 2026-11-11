@@ -179,17 +179,16 @@ feature reachable").
   a popup list (a combo box's drop-down, the Print button's menu) closes as soon as it opens, so
   `ui_snapshot` finds no rows in it and `tests/rows.json` fails.
 - On X11 (`--headless`, `--xvfb`) `window` and `dialog` screenshots are exact while the window fits on
-  the screen (default 1600×1000; `--width`/`--height`, or `set_view {"window_size":[1400,900]}`).
+  the screen (default 1600×1000; `--width`/`--height`, or `set_window {"size":[1400,900]}`).
 - Under Wayland without either, `get_state.display_backend` is `wayland`: `window` and `dialog`
   screenshots are `approximate` (drawn from the widget tree, web views may be blank). Use `"canvas"`,
   exact everywhere, or launch with `GDK_BACKEND=x11`.
 - On X11 OrcaSlicer's own popups are drawn into the capture; another application's window over it
   comes out black (`approximate`). A private display has nothing else on it.
 - Record videos under X11 too, since a Wayland recording leaves dialogs out:
-  `orca_mcp.py launch --headless --width 1920 --height 1080` (`--xvfb` without a desktop), and on a
-  seeded datadir `"window_mainframe": "0; 0; 1920; 1080; 0"` in `OrcaSlicer.conf`'s `app` section so
-  the window fills the screen (`set_view window_size` resizes but keeps its position). A dialog's
-  title bar, drawn by the compositor, is not in the video; its contents are.
+  `orca_mcp.py launch --headless --width 1920 --height 1080` (`--xvfb` without a desktop), then
+  `set_window {"position":[0,0],"size":[1920,1080]}` before `start_recording` so the window fills the
+  screen. A dialog's title bar, drawn by the compositor, is not in the video; its contents are.
 - Launching by hand on a fresh datadir: set `SSL_CERT_FILE` (the harness does), or a CA-bundle
   prompt blocks startup.
 

@@ -35,7 +35,10 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
 - **Exact shapes** (these are what runs got wrong):
   - One camera per call: `set_view {"camera":"top"}`, then `set_view {"camera":"fit_selection"}`.
     Between the named directions: `set_view {"camera":"front","orbit":[30,20]}` (yaw, pitch in degrees),
-    never a drag, which follows the user's mouse settings.
+    never a drag, which follows the user's mouse settings. Close in on a point of the scene:
+    `set_view {"camera":"top","target":<point>,"zoom":2}`, the point in mm taken from the scene (an
+    instance's `offset` from `list_objects`; on the Design tab, `describe_scene`'s `modeling_origin`),
+    `zoom` in screenshot pixels per mm.
   - `export {"format":"gcode"|"sliced_3mf"|"3mf"|"stl","path":"/abs/…","overwrite":true}`; another plate
     `"plates":N`.
   - `select {"objects":[0]}`; a part `select {"volumes":[[0,1]]}`; nothing `select {"none":true}`.
@@ -114,7 +117,7 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
   `effective` and `source`; `"values":{"brim_type":null}` removes one. Only keys the object list
   offers there are taken.
 - **Clicks on the canvas** under a panel or notification are refused, naming what covers it:
-  enlarge the window (`set_view {"window_size":[1600,1000]}`) or turn the camera.
+  enlarge the window (`set_window {"size":[1600,1000]}`) or turn the camera.
 
 ## When no tool reaches it
 

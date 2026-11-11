@@ -11,7 +11,7 @@ Typed neighbours: variable layer height is `set_layer_height_profile`, parts and
 - Flat base: `ui_click {"target":{"gizmo":"Cut"}}` → `ui_input {"target":{"imgui_name":"move_Z"},"value":3}`
   (world Z) → `ui_input {"target":{"imgui":"Keep","imgui_name":"lower"},"value":false}` →
   `ui_click {"target":{"imgui":"Perform cut"}}` → `wait {"for":"idle"}`. [ref]
-- Connectors: `set_view {"window_size":[1600,1000]}` → `set_view {"camera":"top"}` →
+- Connectors: `set_window {"size":[1600,1000]}` → `set_view {"camera":"top"}` →
   `set_view {"camera":"fit_selection"}` → Cut → move_Z → `ui_click {"target":{"imgui":"Add connectors"}}`
   → `ui_click {"target":{"imgui":"Plug"}}` or `"Dowel"` (always: type and size carry over) →
   `ui_input {"target":{"imgui_name":"input_Size"},"value":<mm>}` →
@@ -65,7 +65,7 @@ Typed neighbours: variable layer height is `set_layer_height_profile`, parts and
 - Fuzzy paint: `ui_click {"target":{"gizmo":"Fuzzy Skin Painting"}}` →
   `ui_click {"target":{"imgui_name":"Fill"}}` → `ui_mouse {"at":{"object":0,"spot":"front"}}` → Done →
   `set_settings` thickness / point distance (`fuzzy_skin` `none`, the default, applies the paint). [ref]
-- Texture: `set_view {"window_size":[1600,1300]}` → `set_view {"camera":"iso"}` →
+- Texture: `set_window {"size":[1600,1300]}` → `set_view {"camera":"iso"}` →
   `ui_click {"target":{"gizmo":"Texture Displacement"}}` → wait idle →
   `ui_input {"target":{"imgui_name":"Connected area"},"value":true}` → sleep 1 s →
   `ui_click {"target":{"imgui_name":"Layer 1 image"}}` → sleep →
@@ -83,7 +83,7 @@ A sleep is `wait {"for":"dialog","timeout_s":2}`.
 ## Traps
 
 - A point or ImGui item under a panel or notification is refused, naming it: enlarge the window
-  (`set_view {"window_size":[1600,1000]}`) or turn the camera. No tool closes a notification; a
+  (`set_window {"size":[1600,1000]}`) or turn the camera. No tool closes a notification; a
   warning one goes when its cause does (painted support enforcers with support off: turn
   `enable_support` on).
 - In a painting gizmo, a stroke whose press misses the object is refused with the pixel where it
