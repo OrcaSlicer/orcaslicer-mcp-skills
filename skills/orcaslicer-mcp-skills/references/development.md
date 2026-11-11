@@ -1,7 +1,7 @@
 # Developing OrcaSlicer with its MCP server
 
-For an OrcaSlicer checkout: launching the app with MCP, reproducing issues, scripts that replay,
-the test scripts, and platform notes. `docs/HLSD/mcp-server.md` has
+For an OrcaSlicer checkout: launching the app with MCP, reproducing issues, replays,
+the tests, and platform notes. `docs/HLSD/mcp-server.md` has
 the design (`docs/HLSD/design-tab.md` the Design tab's), `tools/mcp/README.md` the harness.
 
 ## Launch
@@ -25,11 +25,11 @@ seeded with a finished setup wizard and one printer, Bambu Lab X1 Carbon 0.4 by 
 waits until the app is ready and prints the session: `url`, `port`, `token`, `pid`, `datadir`; with
 `--print-config` also the `claude mcp add` line.
 
-- `--cad` turns the Design (CAD) tab on, which `cad_call` needs. The app reads it only at startup,
+- `--cad` turns the Design (CAD) tab on, which `call_cad_tool` needs. The app reads it only at startup,
   so pass it on every launch, also with a reused datadir.
-- Python scripts (`run_python`) run only when the datadir's `OrcaSlicer.conf` has
-  `"mcp_python_scripts": "true"` in its `app` section before the launch; no tool turns it on. A `.py`
-  given to `--mcp-script` runs as a Python script.
+- `--python-scripts` allows Python scripts (`run_script`). They run only when the datadir's
+  `OrcaSlicer.conf` has `"mcp_python_scripts": "true"` in its `app` section before the launch, which the
+  option sets; no tool turns it on. A `.py` given to `--mcp-run` runs as a Python script.
 - `--datadir DIR` reuses a datadir: pass the first launch's on every relaunch, so presets stay the
   same. Never point it at your real OrcaSlicer profile.
 - `--port N` when 13619 is taken (your own OrcaSlicer with MCP on). Several instances at once: give
@@ -37,16 +37,13 @@ waits until the app is ready and prints the session: `url`, `port`, `token`, `pi
 - Arguments after `--` go to the app. `tools/mcp/orca_mcp.py stop` ends the app and its private
   display.
 - Startup problems go to `<datadir>/mcp-launch.log`; at run time `get_log {"level":"warning"}`.
-- Where `tools/mcp/bench/run_bench.py` exists (the agent benchmark), `run_bench.py app --port N
-  --bin PATH [--seed '<case seed JSON>']` starts an app set up as benchmark runs are (CAD on, extra
-  printers and filaments from the seed) and records it in `$ORCA_MCP_SESSION`.
 
 Talk to the app in two ways:
 
 - **The harness**, from any shell: `tools/mcp/orca_mcp.py call <tool> '<json args>' --wait` (`--wait`
-  follows a returned job). Shortcuts: `tools`, `snapshot`, `screenshot /abs/out.png --target canvas`,
-  `run-script FILE --out DIR`. From Python: `sys.path.insert(0, "tools/mcp")`, `OrcaMcp(port, token)`,
-  `call()`, `await_job()`, `images()`.
+  follows a returned job). Shortcuts: `tools`, `widgets`, `screenshot /abs/out.png --target canvas`,
+  `run-replay FILE --out DIR`. From Python: `sys.path.insert(0, "tools/mcp")`, `OrcaMcp(port, token)`,
+  `call()`, `await_job()`, `images()`, `call_cad_tool()`.
 - **Agent tools**, registered with
   `claude mcp add orcaslicer -- /abs/build/src/Release/orca-slicer --mcp-stdio --datadir DIR`
   (Codex: `codex mcp add orcaslicer -- …` with the same command). The
@@ -57,38 +54,39 @@ Talk to the app in two ways:
 
 1. Read the issue (`gh issue view <N> --repo OrcaSlicer/OrcaSlicer --comments`): presets, changed
    settings, steps. Download attachments into a work folder; every path you pass is absolute.
-2. `get_state`: `ready`, `presets`, `dialogs`, `display_backend`. After a forced stop the app asks
-   to restore the project: `dialog_auto_answer {"rules":[{"match":"restore","button":"no"},
+2. `get_app_state`: `ready`, `presets`, `dialogs`, `display_backend`. After a forced stop the app asks
+   to restore the project: `auto_answer_dialogs {"rules":[{"match":"restore","button":"no"},
    {"match":"unsaved changes","button":"no"}]}` (a rule also answers a matching open dialog).
 3. `open_files {"paths":["/abs/work/issue.3mf"]}` (a project, with its presets and plates;
    `"as":"geometry"` for its objects only; `"discard_changes":true` over a modified project).
 4. Configure with `list_presets` / `select_preset` and `get_settings {"query":…}` /
    `set_settings` (the SKILL.md and `references/settings.md`).
 5. Do the steps with typed tools, then `run_action`, then the GUI tools (the area references).
-6. `slice {}`; read `status` and `plates[].outcome`, the statistics, `get_preview`.
+6. `slice {}`; read `status` and `plates[].outcome`, the statistics, `get_slice_stats`.
 7. Point the view: `set_view {"tab":"preview","camera":"iso","layer":40,"view_type":"feature_type"}`;
-   `"layer_z":3.2`, `"legend":{"travel":true}`; `get_state.preview` reads it back.
-8. `screenshot {"target":"canvas","save_path":"/abs/work/before.png","overwrite":true}`; `"window"`,
-   `"dialog"`, or a widget's locator. Read the full-size PNG to look closer.
-9. `export_script {"path":"/abs/work/repro.json"}`. Failed calls are left out, a job that failed
+   `"layer_z":3.2`, `"legend":{"travel":true}`; `get_app_state.preview` reads it back.
+8. `screenshot {"target":"canvas","save_path":"/abs/work/before.png","overwrite":true}`; `"main"`,
+   `"dialog"`, a window's ref from `list_windows`, or a widget's locator. Read the full-size PNG to
+   look closer.
+9. `export_replay {"path":"/abs/work/repro.json"}`. Failed calls are left out, a job that failed
    later included; a call whose job still runs is left out and named in `left_out_running` (wait,
-   export again). `export_script {"clear":true}` at the start drops exploration. Then edit it: add
+   export again). `export_replay {"clear":true}` at the start drops exploration. Then edit it: add
    `expect`s that hold once the bug is fixed, rename the screenshot to `after.png`, use
-   `${script_dir}/…` for files kept beside it.
+   `${replay_dir}/…` for files kept beside it.
 10. Fix, rebuild, `stop`, launch with the same `--datadir`, then
-    `tools/mcp/orca_mcp.py run-script /abs/work/repro.json --out /abs/work` (exit 0 = passes).
-    Without the harness: `orca-slicer --datadir DIR --mcp-script repro.json --mcp-script-out /abs/work`
+    `tools/mcp/orca_mcp.py run-replay /abs/work/repro.json --out /abs/work` (exit 0 = passes).
+    Without the harness: `orca-slicer --datadir DIR --mcp-run repro.json --mcp-run-out /abs/work`
     (on a launch's private display, export the variables in the session file's `display_env`); it
     writes `result.json` and the screenshots and
-    exits 0 (passed), 1 (a step failed) or 2 (invalid script).
+    exits 0 (passed), 1 (a step failed) or 2 (invalid replay).
 11. Compare `before.png` and `after.png` and each step's result.
 
-## Script format
+## Replay format
 
-The script format (steps, placeholders, `expect`, `await`/`save_as`, `optional`, the result) is in
-`references/scripts.md`. A repro script starts from a known scene (`open_files` with
+The replay format (steps, placeholders, `expect`, `await`/`save_as`, `optional`, the result) is in
+`references/replays.md`. A repro replay starts from a known scene (`open_files` with
 `discard_changes`), ends with the `expect`s that hold once the bug is fixed, and keeps its files beside
-it as `${script_dir}/…`. A `.py` given to `run-script`/`--mcp-script` runs as a Python file run
+it as `${replay_dir}/…`. A `.py` given to `run-replay`/`--mcp-run` runs as a Python file run
 (`references/python.md`).
 
 ## Plugins in a test instance
@@ -112,34 +110,35 @@ and `mcp_tools_broken` (a load that fails).
 
 ## Rules the GUI tools follow
 
-- Refs go stale when the UI changes (and after a language change): snapshot again, narrowed with
-  `"query"`. Scripts store locators, never refs.
+- Refs go stale when the UI changes (and after a language change): call `list_widgets` again,
+  narrowed with `"query"`. Replays store locators, never refs.
 - While an operation runs (a slice, an export, or a background job a call started: arrange, orient,
-  fill), other changes are refused; `wait` for its job or `cancel` it. A job a person started (typing
+  fill), other changes are refused; `wait` for its job or `cancel_job` it. A job a person started (typing
   in the Text gizmo) refuses changes too; reads still answer.
 - A Speed Dial command that did nothing is an error with the reason.
-- wx dialogs take `dialog_respond` or an auto-answer, which presses the button and runs its handler;
+- wx dialogs take `answer_dialog` or an auto-answer, which presses the button and runs its handler;
   their `message` reads their controls (SKILL.md, "Dialogs"). A native message box takes
-  `dialog_respond` on Windows and Linux. A file or folder picker, and any native dialog on macOS, only
-  takes a `dialog_auto_answer` rule registered before the step that opens it (a picker can only be
-  cancelled; its text is its prompt).
+  `answer_dialog` on Windows and Linux. A file or folder picker, and any native dialog on macOS, only
+  takes an `auto_answer_dialogs` rule registered before the step that opens it (a picker's rule
+  matches its prompt, and hands it a file with `"button":"ok","path":"/abs/file"`, except on Linux;
+  without a path it cancels the picker).
 - Web pages (the setup wizard, sign-in, web dialogs, plugin windows and dock panels) are driven like
-  widgets: `ui_snapshot` lists each shown page's elements under its web view, and `ui_click`,
-  `ui_input` and `ui_key` take them by ref or by `{"web":"Next","kind":"button","css":"#id","within":…}`.
-  `webview_eval` runs JavaScript in a page; while a modal is open, only its pages answer. Commit a
+  widgets: `list_widgets` lists each shown page's elements under its web view, and `click`,
+  `set_widget_value` and `press_keys` take them by ref or by `{"web":"Next","kind":"button","css":"#id","within":…}`.
+  `run_javascript` runs JavaScript in a page; while a modal is open, only its pages answer. Commit a
   modal page with its own button (`closed: true` in the reply).
 
-## Test scripts
+## Tests
 
-Replay scripts in `tools/mcp/tests/` pass on the current build; their steps are verified call
-shapes. Run one with `tools/mcp/orca_mcp.py run-script tools/mcp/tests/<name>.json --out /tmp/<name>`:
+The replays in `tools/mcp/tests/` pass on the current build; their steps are verified call
+shapes. Run one with `tools/mcp/orca_mcp.py run-replay tools/mcp/tests/<name>.json --out /tmp/<name>`:
 
-- `script_basic.json` (smallest end-to-end), `../smoke_test.json`;
+- `replay_basic.json` (smallest end-to-end), `../smoke_test.json`;
 - `scene.json` (transform, add_part, arrange, fill, object commands), `layers.json` (height ranges,
   variable layer height, layer G-codes), `multicolor.json` (part filaments, project scope),
   `plates.json` (plate scope, filament slots), `presets.json` (save, compare, delete, import,
   preferences), `calibration.json`, `slice_stats.json`, `preview.json`;
-- `gizmos.json` (all 17 gizmos; at another size via `run_script` `"vars":{"window_size":[1100,760]}`);
+- `gizmos.json` (all 17 gizmos; at another size via `run_replay` `"vars":{"window_size":[1100,760]}`);
 - `context_menus.json`, `rows.json`, `plate_icons.json`, `dialogs_canvas_input.json`,
   `webview_modal.json`, `web_dialogs.json` (web pages driven like widgets), `agent_forms.json`
   (argument names and forms agents often write), `recording.json` (needs an ffmpeg with libx265 and
@@ -150,8 +149,11 @@ shapes. Run one with `tools/mcp/orca_mcp.py run-script tools/mcp/tests/<name>.js
 Harness tests (`tools/mcp/test_*.py`, each against the launched instance): `test_stdio_bridge.py`,
 `test_recovery_under_load.py`, `test_cancel_pending_slice.py`, `test_ref_locator_export.py`,
 `test_worker_admission.py`, `test_export_running_job.py` (about 2 min), `test_send_gcode.py` (stub
-host), `test_set_view_preview.py`, `test_webview_modal.py`, `test_script_runner_hidden.py`, and with
-`--cad` `test_cad_replay.py`, `test_cad_slow_build.py`, `test_cad_failed_job.py`.
+host), `test_set_view_preview.py`, `test_set_view_camera.py`, `test_set_window.py`,
+`test_list_windows.py`, `test_webview_modal.py`, `test_action_replay_hidden.py`, and with `--cad`
+`test_cad_replay.py`, `test_cad_slow_build.py`, `test_cad_failed_job.py`, `test_cad_examples.py` (every
+CAD tool's examples) and the Design tab's GUI tests `test_cad_sketching.py`, `test_cad_click_edit.py`
+and `test_cad_context_menu.py`.
 `test_web_ui.py` drives a fixture plugin's pages: `test_web_ui.py --install DIR`, launch with
 `--datadir DIR`, then run it. `test_plugin_tools.py` (a plugin's calls into the tools) launches its own
 instances. Unit tests:
@@ -172,15 +174,15 @@ feature reachable").
   session. It takes KWin (`kwin_wayland --virtual`),
   else mutter; `--headless kwin|mutter` names one. Its output goes to `<datadir>/mcp-display.log`.
 - GNOME, `mutter --headless` (test required): not yet run on a GNOME machine. Before relying on it,
-  check that the window shows and takes input, that `window` screenshots are exact, and that the app's
+  check that the window shows and takes input, that `main` screenshots are exact, and that the app's
   log (`got opengl version …`) names the GPU's driver, not `llvmpipe`; report what you find.
 - `--xvfb` is for a machine without a desktop (CI, a server). It is X11 too, but draws OpenGL in
   software (`llvmpipe`) and runs no window manager, so it is slower and further from what people see:
   a popup list (a combo box's drop-down, the Print button's menu) closes as soon as it opens, so
-  `ui_snapshot` finds no rows in it and `tests/rows.json` fails.
-- On X11 (`--headless`, `--xvfb`) `window` and `dialog` screenshots are exact while the window fits on
+  `list_widgets` finds no rows in it and `tests/rows.json` fails.
+- On X11 (`--headless`, `--xvfb`) `main` and `dialog` screenshots are exact while the window fits on
   the screen (default 1600×1000; `--width`/`--height`, or `set_window {"size":[1400,900]}`).
-- Under Wayland without either, `get_state.display_backend` is `wayland`: `window` and `dialog`
+- Under Wayland without either, `get_app_state.display_backend` is `wayland`: `main` and `dialog`
   screenshots are `approximate` (drawn from the widget tree, web views may be blank). Use `"canvas"`,
   exact everywhere, or launch with `GDK_BACKEND=x11`.
 - On X11 OrcaSlicer's own popups are drawn into the capture; another application's window over it
@@ -194,8 +196,9 @@ feature reachable").
 
 ## Windows notes
 
-- `window` and `dialog` screenshots come from `PrintWindow`: exact even when covered, web views and
-  3D views included; a minimized window can't be captured.
+- `main` and `dialog` screenshots come from Windows Graphics Capture (`PrintWindow` where that is
+  unavailable): exact even when covered, web views and 3D views included; a minimized window can't be
+  captured.
 - The app takes the foreground briefly at start. The GUI tools synthesize input inside the app and
   never move the real pointer. The harness gives the instance its own WebView2 profile.
 
@@ -203,13 +206,14 @@ feature reachable").
 
 - The app opens on your desktop and takes the focus while it starts. The GUI tools never move the
   real pointer.
-- `canvas` screenshots are exact; `window`, `dialog` and widget ones are `approximate` (content view
-  without the title bar; web views may be blank).
+- `canvas` screenshots are exact, and so are `main`, `dialog` and widget ones on macOS 14.4 and later
+  (ScreenCaptureKit); before it, or with the window partly off its display, they are `approximate`
+  (the content view drawn without the title bar; web views may be blank).
 - A native dialog holds the UI thread until answered: the call that opened it returns
   `blocked_by_dialog` with the dialog `native: true`, and every UI tool fails, naming it, until it
-  closes. Register `dialog_auto_answer` first; a folder picker matches by its prompt ("Choose
+  closes. Register `auto_answer_dialogs` first; a folder picker matches by its prompt ("Choose
   Download Directory").
-- `Ctrl` and `Cmd` both mean Command in `ui_key` chords and in `ui_click`/`ui_mouse` `modifiers`;
+- `Ctrl` and `Cmd` both mean Command in `press_keys` chords and in `click`/`mouse_gesture` `modifiers`;
   `RawCtrl` is the Control key.
 - Context menus are captured, never shown, so a click that opens one cannot hold the UI thread;
-  `get_state.closed_menus` lists menus closed unseen.
+  `get_app_state.closed_menus` lists menus closed unseen.

@@ -2,14 +2,14 @@
 
 ## Make a test
 
-`calibrate` builds the Calibration menu's test without its dialog: a new project with the test
+`generate_calibration_test` builds the Calibration menu's test without its dialog: a new project with the test
 model, the presets changed as the test needs, printed with filament slot 1. Select the printer,
 process and filament first, then:
 
-`calibrate {"test":"pressure_advance","start":0,"end":0.06,"step":0.002,"discard_changes":true,"changes":"discard"}`
+`generate_calibration_test {"test":"pressure_advance","start":0,"end":0.06,"step":0.002,"discard_changes":true,"preset_changes":"discard"}`
 → `slice {}` → `export {"format":"gcode","path":"/abs/pa.gcode","overwrite":true}`. [ref]
 
-- `discard_changes` replaces an unsaved project; `changes` is required while presets are modified:
+- `discard_changes` replaces an unsaved project; `preset_changes` is required while presets are modified:
   `"discard"` drops the edits first (a clean test), `"keep"` runs with them.
 - The reply has `params` (the values used, defaults filled in), `objects`, `names`,
   `presets_changed`, `warnings`, and `result_keys` (scope and keys where the measured value goes).
@@ -34,7 +34,7 @@ Examples: `{"test":"flow_ratio","method":"pass1","top_surface_pattern":"monotoni
 
 ## Apply and save a measured value
 
-`new_project {"discard_changes":true,"changes":"discard"}` (drops the test's own settings) →
+`new_project {"discard_changes":true,"preset_changes":"discard"}` (drops the test's own settings) →
 `set_settings` the value in the `result_keys` scope → `save_preset` the preset to keep it. [ref]
 
 - Pressure advance: `set_settings {"scope":"filament","values":{"enable_pressure_advance":true,"pressure_advance":0.034}}`
@@ -57,7 +57,7 @@ Reading results:
 ## Traps
 
 - Each test starts a new project and answers its own prompts: a project with unsaved changes needs
-  `discard_changes`, and modified presets need `changes`, or it is refused.
+  `discard_changes`, and modified presets need `preset_changes`, or it is refused.
 - `machine_max_*` values hold a normal and a silent entry per variant (`meta.variants`); a single
   value writes only the normal entry in use (`12` → `"12,9,9,9"`). Give the silent one by `index`
   too when the printer runs in silent mode.

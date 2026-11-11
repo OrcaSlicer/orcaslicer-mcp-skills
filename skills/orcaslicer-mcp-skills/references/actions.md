@@ -1,15 +1,15 @@
 # Speed Dial actions
 
-Generated from `list_actions`; prefer a typed tool where one exists (`calibrate`, `arrange`, `transform`).
+Generated from `search_actions`; prefer a typed tool where one exists (`generate_calibration_test`, `arrange`, `transform`).
 
 `run_action {"id": "<key>"}` runs one (the full id `orca_command:<key>:orca` works too); `"param"` passes its
 value as a string. A `path` param skips the file dialog: an absolute path for inputs, the JSON string
-`{"path": "/abs/out", "overwrite": true}` for outputs. `list_actions {"query": "..."}` searches them with each
-param's help. Object commands act on what `select` picked, and one that did nothing (nothing selected) is an
+`{"path": "/abs/out", "overwrite": true}` for outputs. `search_actions {"query": "..."}` searches them with each
+param's help. Object commands act on what `select_objects` picked, and one that did nothing (nothing selected) is an
 error. Actions without a param that open a dialog return `blocked_by_dialog`. Left out: the Help group
 except the setup wizard; the Plugins group and the commands installed plugins add, which
-`references/plugins.md` covers; and the person's own Run Script, Start/Stop Recording and Take Screenshot
-commands (agents use `run_script`, `start_recording`, `stop_recording` and `screenshot`).
+`references/plugins.md` covers; and the person's own Action Replay, Run Script, Start/Stop Recording and Take
+Screenshot commands (agents use `run_replay`, `run_script`, `start_recording`, `stop_recording` and `screenshot`).
 
 ## Add Handy models
 
@@ -49,7 +49,7 @@ commands (agents use `run_script`, `start_recording`, `stop_recording` and `scre
 | `obj_center` |  | Center the selection on its plate. |
 | `obj_type_modifier` |  | Make the selected parts modifiers, as Change Type does; not the object's last solid part. Parts are listed by type, so part indices change. |
 | `obj_type_negative` |  | Make the selected parts negative parts, as Change Type does; not the object's last solid part. Parts are listed by type, so part indices change. |
-| `obj_type_part` |  | Make the selected parts (select {volumes} first) solid parts, as Change Type does. Parts are listed by type, so part indices change. |
+| `obj_type_part` |  | Make the selected parts (select_objects {volumes} first) solid parts, as Change Type does. Parts are listed by type, so part indices change. |
 | `obj_type_precise_seam` |  | Make the selected parts Center precise seams (seams keep their subtype), as Change Type does; not the object's last solid part, nor a text or SVG part. Parts are listed by type, so part indices change. |
 | `obj_type_support_blocker` |  | Make the selected parts support blockers, as Change Type does; not the object's last solid part, nor a text or SVG part. Parts are listed by type, so part indices change. |
 | `obj_type_support_enforcer` |  | Make the selected parts support enforcers, as Change Type does; not the object's last solid part, nor a text or SVG part. Parts are listed by type, so part indices change. |
@@ -70,7 +70,7 @@ commands (agents use `run_script`, `start_recording`, `stop_recording` and `scre
 | `obj_fit_volume` |  | Scale the selection to fit the print volume. |
 | `select_all` |  | Select all objects in the 3D view. |
 | `obj_set_instances` | index: total number of instances, 1-1000 | Give the selected object this many instances, in one undo step. With a number, skips the dialog. New instances overlap; arrange afterwards. The reply has object and instances. |
-| `obj_instances_to_objects` |  | Make each instance of the selected object a separate object (select {objects: [n]}); with some of its instances selected, only those. New objects are added last; the reply lists the objects the instances are in now (objects). |
+| `obj_instances_to_objects` |  | Make each instance of the selected object a separate object (select_objects {objects: [n]}); with some of its instances selected, only those. New objects are added last; the reply lists the objects the instances are in now (objects). |
 | `obj_split_objects` |  | Split the selected object into separate objects. |
 | `obj_split_parts` |  | Split the selected object into parts. |
 
@@ -101,7 +101,7 @@ commands (agents use `run_script`, `start_recording`, `stop_recording` and `scre
 | `export_gcode` | path: absolute .gcode path, or {"path": ..., "overwrite": true} | Export the current plate's G-code. With a path, exports there without a dialog once the plate is sliced; the export runs in the background. |
 | `export_stl` | path: absolute .stl path, or {"path": ..., "overwrite": true} | Export all objects as one STL. With a path, writes there without a dialog. |
 | `export_sliced_file` | path: absolute .3mf path, or {"path": ..., "overwrite": true} | Export the current plate's sliced file (.gcode.3mf). With a path, writes there without a dialog. |
-| `send_gcode` |  | Open the Send G-code to printer host dialog for the current plate, as the Print button does for a printer with a print host (OctoPrint, Moonraker, PrusaLink, Duet...). Set the file name with ui_input and press Upload or Upload and Print with dialog_respond; the plate is sliced if needed, then uploaded in the background: get_state.uploads shows the row's state, and a failed upload also opens an error dialog. A replay uploads again. Fails for a printer without a print host, or one that prints through the Bambu network or printer agents. |
+| `send_gcode` |  | Open the Send G-code to printer host dialog for the current plate, as the Print button does for a printer with a print host (OctoPrint, Moonraker, PrusaLink, Duet...). Set the file name with set_widget_value and press Upload or Upload and Print with answer_dialog; the plate is sliced if needed, then uploaded in the background: get_app_state.uploads shows the row's state, and a failed upload also opens an error dialog. A replay uploads again. Fails for a printer without a print host, or one that prints through the Bambu network or printer agents. |
 | `slice_all` |  | Slice every plate and show the Preview tab. Returns at once; use the slice tool to wait for results. |
 | `slice_and_preview` |  | Slice the current plate and show the Preview tab. Returns at once; use the slice tool to wait for the result. |
 
@@ -131,7 +131,7 @@ commands (agents use `run_script`, `start_recording`, `stop_recording` and `scre
 | `go_to_tab` | tab: tab id: home, prepare, preview, monitor, project, calibration, or a plugin page id | Switch to a main window tab. |
 | `load_project` | path: absolute path of a .3mf project | Open a project. With a path, opens that file without a dialog (asks first if the current project has unsaved changes). |
 | `new_project` |  | Start a new, empty project (asks first if the current one has unsaved changes). |
-| `open_preferences` | text: general, files, behaviour, control, graphics, online or developer, optionally :<key>, e.g. behaviour:auto_arrange | Open the Preferences dialog on a tab, scrolled to one preference when given (shown on its own tab). Its controls are named after their preference keys: ui_input {"target": {"name": key, "within": "Preferences"}} changes one through the dialog; get_settings scope preferences reads them. |
+| `open_preferences` | text: general, files, behaviour, control, graphics, online or developer, optionally :<key>, e.g. behaviour:auto_arrange | Open the Preferences dialog on a tab, scrolled to one preference when given (shown on its own tab). Its controls are named after their preference keys: set_widget_value {"target": {"name": key, "within": "Preferences"}} changes one through the dialog; get_settings scope preferences reads them. |
 | `redo` |  | Redo the last undone change. |
 | `save_project` |  | Save the project to its current file (asks for a name if it has none). |
 | `save_project_as` | path: absolute output path, or {"path": ..., "overwrite": true} | Save the project as a .3mf file. With a path, saves there without a dialog. |
@@ -141,15 +141,15 @@ commands (agents use `run_script`, `start_recording`, `stop_recording` and `scre
 
 | key | param | does |
 |---|---|---|
-| `calib_cornering` |  | Open the Cornering Calibration dialog; the calibrate tool runs the same test with typed parameters and no dialog. |
-| `calib_flow_ratio` |  | Open the Flow Ratio Calibration dialog; the calibrate tool runs the same test with typed parameters and no dialog. |
-| `calib_input_shaping_damp` |  | Open the Input Shaping Damping Calibration dialog; the calibrate tool runs the same test with typed parameters and no dialog. |
-| `calib_input_shaping_freq` |  | Open the Input Shaping Frequency Calibration dialog; the calibrate tool runs the same test with typed parameters and no dialog. |
-| `calib_max_volumetric` |  | Open the Max Volumetric Speed Calibration dialog; the calibrate tool runs the same test with typed parameters and no dialog. |
-| `calib_pressure_advance` |  | Open the Pressure Advance Calibration dialog; the calibrate tool runs the same test with typed parameters and no dialog. |
-| `calib_retraction` |  | Open the Retraction Calibration dialog; the calibrate tool runs the same test with typed parameters and no dialog. |
-| `calib_temperature` |  | Open the Temperature Calibration dialog; the calibrate tool runs the same test with typed parameters and no dialog. |
-| `calib_vfa` |  | Open the VFA Calibration dialog; the calibrate tool runs the same test with typed parameters and no dialog. |
+| `calib_cornering` |  | Open the Cornering Calibration dialog; the generate_calibration_test tool runs the same test with typed parameters and no dialog. |
+| `calib_flow_ratio` |  | Open the Flow Ratio Calibration dialog; the generate_calibration_test tool runs the same test with typed parameters and no dialog. |
+| `calib_input_shaping_damp` |  | Open the Input Shaping Damping Calibration dialog; the generate_calibration_test tool runs the same test with typed parameters and no dialog. |
+| `calib_input_shaping_freq` |  | Open the Input Shaping Frequency Calibration dialog; the generate_calibration_test tool runs the same test with typed parameters and no dialog. |
+| `calib_max_volumetric` |  | Open the Max Volumetric Speed Calibration dialog; the generate_calibration_test tool runs the same test with typed parameters and no dialog. |
+| `calib_pressure_advance` |  | Open the Pressure Advance Calibration dialog; the generate_calibration_test tool runs the same test with typed parameters and no dialog. |
+| `calib_retraction` |  | Open the Retraction Calibration dialog; the generate_calibration_test tool runs the same test with typed parameters and no dialog. |
+| `calib_temperature` |  | Open the Temperature Calibration dialog; the generate_calibration_test tool runs the same test with typed parameters and no dialog. |
+| `calib_vfa` |  | Open the VFA Calibration dialog; the generate_calibration_test tool runs the same test with typed parameters and no dialog. |
 
 ## Presets
 

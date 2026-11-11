@@ -5,13 +5,13 @@ slicer. With OrcaSlicer's MCP server connected, an AI agent such as Claude Code,
 can load, place and arrange models, change print, filament and printer settings and presets, add
 supports, modifiers and multi-colour painting, use the cut, text and other gizmos, run calibration
 tests, model parts in the Design (CAD) tab, slice, read or export the results, run Python scripts
-and scripts of tool calls inside OrcaSlicer, use and write OrcaSlicer plugins, and record videos of
+and replays of tool calls inside OrcaSlicer, use and write OrcaSlicer plugins, and record videos of
 it. The skill teaches the agent the tool calls that work, the
 settings whose meaning their label hides, and the traps that otherwise cost retries, so tasks finish
 in fewer calls and with fewer screenshots.
 
 It also covers developing OrcaSlicer itself: launching a build with MCP, reproducing an issue, and
-recording replayable test scripts.
+recording replays for tests.
 
 ## Before you start
 

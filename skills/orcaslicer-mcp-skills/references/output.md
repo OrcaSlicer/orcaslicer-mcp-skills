@@ -7,7 +7,7 @@
   `ok` one has `time_s`, `time`, `filament_g`/`filament_m` (flush included), `filament_cost`,
   `layers`, `max_z`, `filament_changes`, and `filaments[i]` for slot i+1 with `g`, `model_g`,
   `support_g`, `flush_g`, `tower_g`. Purge waste = Σ `flush_g` + Σ `tower_g`. [ref]
-- Preview numbers, no screenshot: `get_preview {"include":["features","layers","objects","view"]}`
+- Preview numbers, no screenshot: `get_slice_stats {"include":["features","layers","objects","view"]}`
   ( `"plate":N` for another sliced plate). [ref]
   - `features`: seconds, share and grams per feature type (`"Outer wall"`, `"Support"`…), `Travel`.
   - `layers`: per layer `layer` (1-based, the slider's), `z`, `height`, `time_s`, `g`; paged with
@@ -19,7 +19,7 @@
 - Export: `export {"format":"gcode","path":"/abs/x.gcode","overwrite":true}` (current plate,
   `"plates":N` for another); `"sliced_3mf"` with `"plates":N|"all"` and a `.gcode.3mf` path;
   `"3mf"` the model without slicing data; `"stl"` all objects in one file. [ref]
-- One STL per object, named: rename the objects (`select {"objects":[i]}` →
+- One STL per object, named: rename the objects (`select_objects {"objects":[i]}` →
   `run_action {"id":"obj_rename","param":"bunny_keychain"}`), then
   `run_action {"id":"export_stl_multi","param":"/abs/existing_dir"}` writes
   `<name>.stl` each. [ref]
@@ -33,11 +33,11 @@
   `list_plates {}` reads every plate back: `overrides`, `objects`, `sliced`, `layer_gcode`. [ref]
 - Upload to OctoPrint/Moonraker/PrusaLink: `set_settings {"scope":"printer","values":
   {"host_type":"moonraker","print_host":"http://127.0.0.1:7125"}}` (`"printhost_apikey"` for
-  OctoPrint; `"bbl_use_printhost":true` on a Bambu printer) → `slice {}` → in one `run_script`:
+  OctoPrint; `"bbl_use_printhost":true` on a Bambu printer) → `slice {}` → in one `run_replay`:
   `run_action {"id":"send_gcode"}` (`"await":false`, `"save_as":"send"`) →
-  `ui_input {"target":{"class":"wxTextCtrl","within":"Send G-code to printer host"},"value":"part.gcode","submit":false}`
-  → `dialog_respond {"button":"Upload"}` (or `"Upload and Print"`) → wait job. Then poll
-  `get_state.uploads` until the row reads `completed` or `error`. [ref]
+  `set_widget_value {"target":{"class":"wxTextCtrl","within":"Send G-code to printer host"},"value":"part.gcode","submit":false}`
+  → `answer_dialog {"button":"Upload"}` (or `"Upload and Print"`) → wait job. Then poll
+  `get_app_state.uploads` until the row reads `completed` or `error`. [ref]
 - Preview view for screenshots:
   `set_view {"tab":"preview","view_type":"volumetric_flow_rate","layer_z":10.2}`;
   `"legend":{"Sparse infill":false,"travel":true}` hides or shows rows (after `view_type`). [ref]
@@ -48,16 +48,16 @@
   call; `pointer` highlights the pointer and its clicks. [ref]
   - Answer each dialog as soon as it opens: `wait {"for":"dialog"}`, pause 2–3 s so a viewer can read
     it (`wait {"for":"no_dialog","timeout_s":3}` returns after 3 s while it stays open), then
-    `dialog_respond`. [ref] Never `wait {"for":"idle"}` while a dialog may be open: idle needs no
+    `answer_dialog`. [ref] Never `wait {"for":"idle"}` while a dialog may be open: idle needs no
     dialog open, so the wait runs to its timeout and the video shows a frozen window.
   - On Linux a Wayland recording leaves dialogs out: record under X11, launched with `--headless`
     (`--xvfb` on a machine without a desktop; `references/development.md`).
 
 ## Traps
 
-- After an edit, a plate switch or `slice {"plates":"all"}`, `export` or `get_preview` can refuse
+- After an edit, a plate switch or `slice {"plates":"all"}`, `export` or `get_slice_stats` can refuse
   "Slicing is in progress": `wait {"for":"idle"}`, then repeat.
-- Any edit invalidates the slice: slice again before `get_preview` or export.
+- Any edit invalidates the slice: slice again before `get_slice_stats` or export.
 - A by-object plate needs objects ≥ `extruder_clearance_radius` apart (`references/scene.md`).
 - Opening a `.gcode` file to view it asks to save the project even with `discard_changes`:
   auto-answer `{"match":"unsaved changes. Would you like to save","button":"no"}` first.

@@ -13,7 +13,7 @@
   (`"scope":"filament"` or `"printer"` for theirs); `{"where":"Strength > Infill"}` returns that group in
   full. Read groups: a whole page (`"where":"Quality"`) can exceed what the client keeps in the
   conversation. [ref]
-- Edit: `set_settings {"scope":"print"|"filament"|"printer","values":{...}}`; a filament slot's preset
+- Edit: `set_settings {"scope":"process"|"filament"|"printer","values":{...}}`; a filament slot's preset
   `"filament_slot":2`. The reply's `applied` and `changed` (the app's own adjustments included). [ref]
 - Per-variant values (meta lists `variants` and `active`, e.g. X1C speeds and temperatures "Direct
   Drive Standard, Direct Drive High Flow"): a single value writes the entry in use
@@ -23,7 +23,7 @@
   `set_settings {"scope":"process","values":{"wall_loops":null}}` (`"reset_to":"parent"` for the
   parent's value); all: `set_settings {"scope":"process","reset_all":true}`. [ref]
 - Select: `select_preset {"type":"process","name":"0.24mm Draft @BBL X1C"}`; filament
-  `"filament_slot":1`. With unsaved edits add `"changes":"transfer"` (keep them on the new preset) or
+  `"filament_slot":1`. With unsaved edits add `"preset_changes":"transfer"` (keep them on the new preset) or
   `"discard"`; without it the prompt opens. [ref]
 - Save: `save_preset {"type":"filament","name":"Inland PLA+"}` saves the edited preset with its edits
   and selects it (`"overwrite":true` to replace one; `"inside_project":true` keeps it in the project
@@ -42,7 +42,7 @@
   selectors for this session only: after a restart the app selects a visible preset again. [ref]
 - Nozzle: `select_preset {"type":"printer","name":"Bambu Lab X1 Carbon 0.6 nozzle"}`, installed or
   not; the process follows (`0.30mm Standard @BBL X1C 0.6 nozzle`) and the filament may change:
-  re-read `get_state.presets` and `select_preset` the filament again. [ref] `nozzle_type`
+  re-read `get_app_state.presets` and `select_preset` the filament again. [ref] `nozzle_type`
   (`hardened_steel`) is a printer setting; `save_preset` the printer to keep it.
 - Plate type: `set_settings {"scope":"project","values":{"curr_bed_type":"Textured PEI Plate"}}`
   (`meta.offered` lists the printer's); one plate only: plate scope (`references/output.md`). [ref]
@@ -57,16 +57,16 @@
     `select_preset` the printer, process and filament by name. [ref] The bundle's base printer must
     be installed.
 - Export presets: `run_action {"id":"export_config","param":"/abs/dir"}` opens the
-  dialog (script, `"await":false`): `ui_click {"target":{"label":"Filament presets(.zip)","within":"Export Preset Bundle"}}`
-  → `ui_input {"target":{"name":"<preset>","within":"Export Preset Bundle"},"value":true}` →
-  `dialog_respond {"button":"ok"}` → `dialog_respond {"dialog":{"title":"Info"},"button":"ok"}`.
+  dialog (replay, `"await":false`): `click {"target":{"label":"Filament presets(.zip)","within":"Export Preset Bundle"}}`
+  → `set_widget_value {"target":{"name":"<preset>","within":"Export Preset Bundle"},"value":true}` →
+  `answer_dialog {"button":"ok"}` → `answer_dialog {"dialog":{"title":"Info"},"button":"ok"}`.
 - Preferences: read `get_settings {"scope":"preferences","keys":["export_statistics"]}`; change in the
-  dialog (script): `run_action {"id":"open_preferences","param":"developer:export_statistics"}`
-  (`"await":false`) → `ui_input {"target":{"name":"export_statistics","within":"Preferences"},"value":true}`
-  → `dialog_respond {"dialog":{"title":"Preferences"},"button":"close"}`. Checkboxes and fields save;
+  dialog (replay): `run_action {"id":"open_preferences","param":"developer:export_statistics"}`
+  (`"await":false`) → `set_widget_value {"target":{"name":"export_statistics","within":"Preferences"},"value":true}`
+  → `answer_dialog {"dialog":{"title":"Preferences"},"button":"close"}`. Checkboxes and fields save;
   most drop-down lists don't.
-- Create a custom printer (fallback): run `references/scripts/create-printer.json` with
-  `run_script {"script":<its JSON>}` after changing the vendor, model, nozzle, bed size, origin,
+- Create a custom printer (fallback): run `references/replays/create-printer.json` with
+  `run_replay {"replay":<its JSON>}` after changing the vendor, model, nozzle, bed size, origin,
   height and template it types; checkboxes and paired fields are addressed by index.
 
 ## Label → key
@@ -82,9 +82,9 @@ Contour `external`, Painted only `none`, noise `"perlin"`; overhang 50–75 % `o
 
 ## Traps
 
-- `select_preset` printer silently changes process and filaments: re-read `get_state.presets`.
+- `select_preset` printer silently changes process and filaments: re-read `get_app_state.presets`.
 - `new_project {"discard_changes":true}` keeps modified presets (its reply lists them under
-  `modified`); add `"changes":"discard"` to drop them.
+  `modified`); add `"preset_changes":"discard"` to drop them.
 - `list_presets` leaves out presets that aren't installed unless `"include_hidden":true`; a name that
   isn't there at all, or a preset that doesn't suit the selected printer, is refused with that reason.
 - A key of another scope is refused, naming the scope to pass (`"k" is a filament setting`).
@@ -95,6 +95,6 @@ Contour `external`, Painted only `none`, noise `"perlin"`; overhang 50–75 % `o
 ## Not possible
 
 Installing system printers or filaments for good, or the setup wizard's choices (its page opens with
-`run_action {"id":"help_setup_wizard"}` and its elements are `ui_snapshot` items that `ui_click` and
-`ui_input` take by `{"web":"Next"}` locators, but no recipe is verified); writing preferences without
+`run_action {"id":"help_setup_wizard"}` and its elements are `list_widgets` items that `click` and
+`set_widget_value` take by `{"web":"Next"}` locators, but no recipe is verified); writing preferences without
 the dialog.

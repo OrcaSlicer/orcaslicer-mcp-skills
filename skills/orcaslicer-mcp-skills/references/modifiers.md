@@ -19,22 +19,22 @@
 - Settings inside a modifier: `set_settings {"scope":"volume","object":0,"volume":2,"values":
   {"sparse_infill_density":"100%","wall_loops":4}}` (region keys only). [ref]
 - Height ranges ("below 15 mm …, from 15 mm …"):
-  `set_layer_ranges {"object":0,"layer_config_ranges":[{"min_z":0,"max_z":15,"values":{"layer_height":0.28}},
+  `set_height_ranges {"object":0,"ranges":[{"min_z":0,"max_z":15,"values":{"layer_height":0.28}},
   {"min_z":15,"max_z":48,"values":{"layer_height":0.12}}]}`. It replaces all ranges (`[]` removes
   them); ranges may touch, not overlap; `values` take `layer_height`, `extruder` and per-region keys
   (`sparse_infill_density`, `wall_loops`). Read back in `list_objects` `layer_config_ranges`; slice
   and check `layers`. [ref]
-- Change a part's type: `select {"volumes":[[0,1]]}` →
+- Change a part's type: `select_objects {"volumes":[[0,1]]}` →
   `run_action {"id":"obj_type_modifier"}` (`_part`, `_negative`,
   `_support_blocker`, `_support_enforcer`, `_precise_seam`); part indices change, re-read
   `list_objects`. [ref]
 - Imported modifier zones: `add_part {"object":0,"type":"modifier","path":"/abs/zones.stl"}` (lands at
   the file's coordinates relative to the object's first part), or load both files and
-  `select {"objects":[0,1]}` → `run_action {"id":"obj_assemble"}` → change the
+  `select_objects {"objects":[0,1]}` → `run_action {"id":"obj_assemble"}` → change the
   zone part's type as above. [ref]
-- Split into parts: `select {"objects":[0]}` → `run_action {"id":"obj_split_parts"}`;
+- Split into parts: `select_objects {"objects":[0]}` → `run_action {"id":"obj_split_parts"}`;
   into objects: `obj_split_objects`. [ref]
-- Rename an object or part: `select {"objects":[0]}` (or `{"volumes":[[0,1]]}`) →
+- Rename an object or part: `select_objects {"objects":[0]}` (or `{"volumes":[[0,1]]}`) →
   `run_action {"id":"obj_rename","param":"tall"}`. [ref]
 - Move or resize a part: `transform {"object":0,"volume":1,"translate":[100,100,15],"mode":"absolute"}`
   (the part's centre on the bed), `"size":[null,null,3]`, `"scale":2`; rotation relative only. [ref]
@@ -47,8 +47,8 @@
   `bbox` counts model parts only, not modifiers or negative parts.
 - A single-part object has no part row: an `extruder` set on its `"volume":0` is the object's (the
   reply notes it); use the object scope.
-- `ui_mouse` points on modifiers and negative parts are targets like any part.
+- `mouse_gesture` points on modifiers and negative parts are targets like any part.
 
 ## Not possible
 
-Per-range settings outside `layer_config_ranges`' key set (support settings are refused there).
+Per-range settings outside the height ranges' key set (support settings are refused there).

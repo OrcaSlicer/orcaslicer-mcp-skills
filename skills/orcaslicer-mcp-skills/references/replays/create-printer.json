@@ -1,9 +1,9 @@
 {
- "orca_script": 1,
+ "orca_replay": 1,
  "name": "create printer",
  "steps": [
   {
-   "tool": "ui_input",
+   "tool": "set_widget_value",
    "args": {
     "target": {
      "class": "PlaterPresetComboBox",
@@ -22,7 +22,7 @@
    }
   },
   {
-   "tool": "ui_click",
+   "tool": "click",
    "args": {
     "target": {
      "class": "CheckBox",
@@ -32,7 +32,7 @@
    }
   },
   {
-   "tool": "ui_input",
+   "tool": "set_widget_value",
    "args": {
     "target": {
      "label": "Printer",
@@ -45,7 +45,7 @@
    }
   },
   {
-   "tool": "ui_input",
+   "tool": "set_widget_value",
    "args": {
     "target": {
      "label": "Printer",
@@ -58,7 +58,7 @@
    }
   },
   {
-   "tool": "ui_input",
+   "tool": "set_widget_value",
    "args": {
     "target": {
      "label": "Nozzle Diameter",
@@ -69,7 +69,7 @@
    }
   },
   {
-   "tool": "ui_input",
+   "tool": "set_widget_value",
    "args": {
     "target": {
      "label": "Printable Space",
@@ -81,7 +81,7 @@
    }
   },
   {
-   "tool": "ui_input",
+   "tool": "set_widget_value",
    "args": {
     "target": {
      "label": "Printable Space",
@@ -93,7 +93,7 @@
    }
   },
   {
-   "tool": "ui_input",
+   "tool": "set_widget_value",
    "args": {
     "target": {
      "label": "Origin",
@@ -105,7 +105,7 @@
    }
   },
   {
-   "tool": "ui_input",
+   "tool": "set_widget_value",
    "args": {
     "target": {
      "label": "Origin",
@@ -117,7 +117,7 @@
    }
   },
   {
-   "tool": "ui_input",
+   "tool": "set_widget_value",
    "args": {
     "target": {
      "label": "Max Print Height",
@@ -128,13 +128,13 @@
    }
   },
   {
-   "tool": "dialog_respond",
+   "tool": "answer_dialog",
    "args": {
     "button": "ok"
    }
   },
   {
-   "tool": "ui_input",
+   "tool": "set_widget_value",
    "args": {
     "target": {
      "label": "Select Vendor",
@@ -144,7 +144,7 @@
    }
   },
   {
-   "tool": "ui_input",
+   "tool": "set_widget_value",
    "args": {
     "target": {
      "class": "ComboBox",
@@ -155,7 +155,7 @@
    }
   },
   {
-   "tool": "ui_click",
+   "tool": "click",
    "args": {
     "target": {
      "label": "Create Based on Current Printer",
@@ -166,7 +166,7 @@
    }
   },
   {
-   "tool": "ui_click",
+   "tool": "click",
    "args": {
     "target": {
      "class": "CheckBox",
@@ -181,7 +181,7 @@
    }
   },
   {
-   "tool": "ui_click",
+   "tool": "click",
    "args": {
     "target": {
      "class": "CheckBox",
@@ -196,7 +196,7 @@
    }
   },
   {
-   "tool": "ui_click",
+   "tool": "click",
    "args": {
     "target": {
      "class": "CheckBox",
@@ -211,7 +211,7 @@
    }
   },
   {
-   "tool": "ui_click",
+   "tool": "click",
    "args": {
     "target": {
      "label": "Create",
@@ -228,7 +228,7 @@
    }
   },
   {
-   "tool": "dialog_respond",
+   "tool": "answer_dialog",
    "args": {
     "button": "Printer Setting"
    }

@@ -2,7 +2,7 @@
 
 ## Recipes
 
-- Tree from build plate: `set_settings {"scope":"print","values":{"enable_support":true,
+- Tree from build plate: `set_settings {"scope":"process","values":{"enable_support":true,
   "support_type":"tree(auto)","support_on_build_plate_only":true}}` → slice. Types: `normal(auto)`,
   `tree(auto)`, `normal(manual)`, `tree(manual)` ("manual" = only where enforcers are). [ref]
 - Normal snug, two calls, type first: `{"support_type":"normal(auto)"}` → `{"support_style":"snug",
@@ -17,10 +17,10 @@
   size it to cover the space under the overhang, from the bbox in `list_objects`.
   `"support_enforcer"` likewise. [ref]
 - Mouse ears: `{"brim_type":"brim_ears","brim_width":8}` (`brim_width` is the ear radius). [ref]
-- Brim Ears tool: `select` → `set_view {"camera":"iso"}` → `set_view {"camera":"fit_selection"}` →
-  `ui_click {"target":{"gizmo":"Brim Ears"}}` → `ui_click {"target":{"imgui_name":"Set brim type to painted"}}`
-  → `ui_input {"target":{"imgui":"Brim ear radius"},"value":5}` → `ui_click {"target":{"imgui":"Auto-generate"}}`
-  → `ui_click {"target":{"imgui":"Done"}}`; `list_objects` shows `brim_ears` (count). Ears keep the
+- Brim Ears tool: `select_objects` → `set_view {"camera":"iso"}` → `set_view {"camera":"fit_selection"}` →
+  `click {"target":{"gizmo":"Brim Ears"}}` → `click {"target":{"imgui_name":"Set brim type to painted"}}`
+  → `set_widget_value {"target":{"imgui":"Brim ear radius"},"value":5}` → `click {"target":{"imgui":"Auto-generate"}}`
+  → `click {"target":{"imgui":"Done"}}`; `list_objects` shows `brim_ears` (count). Ears keep the
   radius they were made with. [ref]
 - Raft + draft shield: `{"raft_layers":3,"skirt_loops":1,"draft_shield":"enabled"}` (0 skirt loops =
   no shield). [ref]
@@ -30,23 +30,23 @@
 - Interface-only support filament: `run_action {"id":"filament_add"}` →
   `select_preset {"type":"filament","name":"…","filament_slot":2}` → plate type for PETG
   (`references/settings.md`) → auto-answer `{"match":"support material for the support interface","button":"yes"}`
-  and `{"match":"recommend the following settings","button":"yes"}` → `set_settings {"scope":"print",
+  and `{"match":"recommend the following settings","button":"yes"}` → `set_settings {"scope":"process",
   "values":{"enable_support":true,"support_interface_filament":2,"support_filament":0,
   "support_interface_not_for_body":1}}` → slice; the reply's `filaments[i].support_g` shows the split. [ref]
-- Painted blocker under a face: `select` → `ui_click {"target":{"gizmo":"FdmSupports"}}` →
-  `ui_click {"target":{"imgui_name":"Fill"}}` → `set_view {"camera":"bottom"}` →
-  `ui_mouse {"button":"right","at":{"object":0,"point":[143,128,30],"frame":"world"}}` →
-  `ui_click {"target":{"imgui":"Done"}}`. Left button = enforcer. From below the bed hides nothing. [ref]
+- Painted blocker under a face: `select_objects` → `click {"target":{"gizmo":"FdmSupports"}}` →
+  `click {"target":{"imgui_name":"Fill"}}` → `set_view {"camera":"bottom"}` →
+  `mouse_gesture {"button":"right","at":{"object":0,"point":[143,128,30],"frame":"world"}}` →
+  `click {"target":{"imgui":"Done"}}`. Left button = enforcer. From below the bed hides nothing. [ref]
 - Enforcers on real overhangs:
-  1. `set_settings {"scope":"print","values":{"enable_support":true,"support_type":"tree(manual)"}}` →
-     `ui_click {"target":{"gizmo":"FdmSupports"}}` → `ui_click {"target":{"imgui_name":"Fill"}}`.
-  2. `ui_input {"target":{"imgui":"Highlight overhangs"},"value":30}` →
-     `ui_input {"target":{"imgui":"On highlighted overhangs only"},"value":true}`.
+  1. `set_settings {"scope":"process","values":{"enable_support":true,"support_type":"tree(manual)"}}` →
+     `click {"target":{"gizmo":"FdmSupports"}}` → `click {"target":{"imgui_name":"Fill"}}`.
+  2. `set_widget_value {"target":{"imgui":"Highlight overhangs"},"value":30}` →
+     `set_widget_value {"target":{"imgui":"On highlighted overhangs only"},"value":true}`.
   3. `set_view {"camera":"front"}` → `set_view {"camera":"fit_objects"}`.
-  4. `ui_mouse {"at":{"object":0,"point":[82.5,92.51,58.55],"frame":"world"}}` (the Stanford Bunny's
+  4. `mouse_gesture {"at":{"object":0,"point":[82.5,92.51,58.55],"frame":"world"}}` (the Stanford Bunny's
      chin at the X1C plate centre): with Fill and "On highlighted overhangs only", one click fills the
      connected overhang.
-  5. `ui_click {"target":{"imgui":"Done"}}`. [ref]
+  5. `click {"target":{"imgui":"Done"}}`. [ref]
 
 ## Traps
 

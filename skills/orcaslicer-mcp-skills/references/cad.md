@@ -1,9 +1,10 @@
 # Design (CAD) tab
 
-Every call is `cad_call {"method":"<name>","params":{...}}`. The CAD feature must be on
-(Preferences > Features, then a restart). Look up params with
-`cad_call {"method":"describe_tools","params":{"method":["extrude","hole"]}}` or
-`{"query":"sketch"}`, never the whole list.
+Every call is `call_cad_tool {"tool":"<name>","args":{...}}`; the recipes below write it short, as
+`<name> {args}`, and its reply is `{"result":{…}}`. The CAD feature must be on (Preferences >
+Features, then a restart; `get_app_state.design_tab` says so). Look up a tool's arguments and
+examples with `describe_cad_tool {"tool":["extrude","hole"]}`, and find one with
+`list_cad_tools {"query":"sketch"}` (no query: all 80, a line each).
 
 ## Frames
 
@@ -71,14 +72,15 @@ Every call is `cad_call {"method":"<name>","params":{...}}`. The CAD feature mus
 
 ## Traps
 
-- `sketch_add` ignores unknown keys: a line given `start`/`end` becomes a zero-length line, and the
-  extrude then fails ("BRep_API: command not done"). Use `p0`/`p1`.
-- The methods in `describe_tools`' `legacy_ok_false` (`fillet`, `chamfer`, `boolean`, `pattern`,
-  `shell`, `mirror`, `set_variable`, `set_feature_expr`, `import_*`…) answer `{"ok":false,"error":…}`
-  instead of failing: check `ok`.
+- A sketch line's ends are `p0` and `p1`; `start`/`end` is refused.
+- The tools whose `failure` is `reply` in `describe_cad_tool` (`fillet`, `chamfer`, `boolean`,
+  `pattern`, `shell`, `mirror`, `set_variable`, `set_feature_expr`, `import_*`…) answer
+  `{"result":{"ok":false,"error":…}}` instead of failing: check `ok`.
+- A CAD tool is not a tool of its own: calling `extrude` directly, or through `call_tool` or
+  `run_action`, is refused with the `call_cad_tool` form.
 - Face and edge ids from `query_topology` expire when the model rebuilds; deleting or moving features
   renumbers features and bodies.
-- Design-only edits leave `get_state.project.dirty` false, yet opening another project with
+- Design-only edits leave `get_app_state.project.dirty` false, yet opening another project with
   `open_files {"discard_changes":true}` can still ask "save before continuing": auto-answer
   `{"match":"save before continuing","button":"no"}` first.
 - Commit appends: without `replace`, the earlier committed object stays on the plate.
