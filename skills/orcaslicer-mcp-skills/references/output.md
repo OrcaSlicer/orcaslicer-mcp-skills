@@ -50,7 +50,8 @@
     it (`wait {"for":"no_dialog","timeout_s":3}` returns after 3 s while it stays open), then
     `dialog_respond`. [ref] Never `wait {"for":"idle"}` while a dialog may be open: idle needs no
     dialog open, so the wait runs to its timeout and the video shows a frozen window.
-  - On Linux a Wayland recording leaves dialogs out: record under X11 (`references/development.md`).
+  - On Linux a Wayland recording leaves dialogs out: record under X11, launched with `--headless`
+    (`--xvfb` on a machine without a desktop; `references/development.md`).
 
 ## Traps
 

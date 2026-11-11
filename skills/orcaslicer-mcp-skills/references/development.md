@@ -10,9 +10,13 @@ Build Release (`cmake --build build/arm64 --config Release --target all --` on m
 `cmake --build build --config Release --target all --` on Linux, `build_win.bat` on Windows), then:
 
 ```bash
-tools/mcp/orca_mcp.py launch --print-config          # macOS, Windows (python tools/mcp/orca_mcp.py …)
-tools/mcp/orca_mcp.py launch --xvfb --print-config   # Linux, on a private X display
+tools/mcp/orca_mcp.py launch --print-config              # macOS, Windows (python tools/mcp/orca_mcp.py …)
+tools/mcp/orca_mcp.py launch --headless --print-config   # Linux with a desktop: a private headless one, off yours
+tools/mcp/orca_mcp.py launch --xvfb --print-config       # Linux without a desktop (CI, a server)
 ```
+
+On Linux prefer `--headless` (see "Linux display notes"); use `--xvfb` only where no desktop is
+installed. `--headless` falls back to Xvfb by itself when it finds no headless compositor.
 
 `launch` starts the build's binary (or `--bin PATH`; on macOS the bundle under `build/<arch>`, on
 Windows `build-clang\src\Release\orca-slicer.exe` too) with `--mcp` and a fresh temporary datadir,
@@ -30,7 +34,8 @@ waits until the app is ready and prints the session: `url`, `port`, `token`, `pi
   same. Never point it at your real OrcaSlicer profile.
 - `--port N` when 13619 is taken (your own OrcaSlicer with MCP on). Several instances at once: give
   each its own `ORCA_MCP_SESSION` file and `--port`.
-- Arguments after `--` go to the app. `tools/mcp/orca_mcp.py stop` ends the app and its Xvfb.
+- Arguments after `--` go to the app. `tools/mcp/orca_mcp.py stop` ends the app and its private
+  display.
 - Startup problems go to `<datadir>/mcp-launch.log`; at run time `get_log {"level":"warning"}`.
 - Where `tools/mcp/bench/run_bench.py` exists (the agent benchmark), `run_bench.py app --port N
   --bin PATH [--seed '<case seed JSON>']` starts an app set up as benchmark runs are (CAD on, extra
@@ -73,7 +78,8 @@ Talk to the app in two ways:
 10. Fix, rebuild, `stop`, launch with the same `--datadir`, then
     `tools/mcp/orca_mcp.py run-script /abs/work/repro.json --out /abs/work` (exit 0 = passes).
     Without the harness: `orca-slicer --datadir DIR --mcp-script repro.json --mcp-script-out /abs/work`
-    (under Xvfb set `DISPLAY` and `GDK_BACKEND=x11`); it writes `result.json` and the screenshots and
+    (on a launch's private display, export the variables in the session file's `display_env`); it
+    writes `result.json` and the screenshots and
     exits 0 (passed), 1 (a step failed) or 2 (invalid script).
 11. Compare `before.png` and `after.png` and each step's result.
 
@@ -159,17 +165,31 @@ feature reachable").
 
 ## Linux display notes
 
-- `--xvfb` runs on X11, so `window` and `dialog` screenshots are exact while the window fits on the
-  screen (default 1600×1000; `--width`/`--height`, or `set_view {"window_size":[1400,900]}`).
-- Under Wayland without `--xvfb`, `get_state.display_backend` is `wayland`: `window` and `dialog`
+- `--headless` starts a headless Wayland compositor on a session bus of its own and runs the app on
+  its XWayland (`display_backend` `x11`), off your desktop: the app draws with the GPU's OpenGL
+  driver, and the compositor is a window manager, so focus, stacking and popup lists behave as on a
+  desktop, and the D-Bus services the app starts, such as the desktop portals, stay out of your
+  session. It takes KWin (`kwin_wayland --virtual`),
+  else mutter; `--headless kwin|mutter` names one. Its output goes to `<datadir>/mcp-display.log`.
+- GNOME, `mutter --headless` (test required): not yet run on a GNOME machine. Before relying on it,
+  check that the window shows and takes input, that `window` screenshots are exact, and that the app's
+  log (`got opengl version …`) names the GPU's driver, not `llvmpipe`; report what you find.
+- `--xvfb` is for a machine without a desktop (CI, a server). It is X11 too, but draws OpenGL in
+  software (`llvmpipe`) and runs no window manager, so it is slower and further from what people see:
+  a popup list (a combo box's drop-down, the Print button's menu) closes as soon as it opens, so
+  `ui_snapshot` finds no rows in it and `tests/rows.json` fails.
+- On X11 (`--headless`, `--xvfb`) `window` and `dialog` screenshots are exact while the window fits on
+  the screen (default 1600×1000; `--width`/`--height`, or `set_view {"window_size":[1400,900]}`).
+- Under Wayland without either, `get_state.display_backend` is `wayland`: `window` and `dialog`
   screenshots are `approximate` (drawn from the widget tree, web views may be blank). Use `"canvas"`,
   exact everywhere, or launch with `GDK_BACKEND=x11`.
 - On X11 OrcaSlicer's own popups are drawn into the capture; another application's window over it
-  comes out black (`approximate`). Xvfb has nothing on top.
+  comes out black (`approximate`). A private display has nothing else on it.
 - Record videos under X11 too, since a Wayland recording leaves dialogs out:
-  `orca_mcp.py launch --xvfb --width 1920 --height 1080`, and on a seeded datadir
-  `"window_mainframe": "0; 0; 1920; 1080; 0"` in `OrcaSlicer.conf`'s `app` section so the window fills
-  the screen (`set_view window_size` resizes but keeps its position).
+  `orca_mcp.py launch --headless --width 1920 --height 1080` (`--xvfb` without a desktop), and on a
+  seeded datadir `"window_mainframe": "0; 0; 1920; 1080; 0"` in `OrcaSlicer.conf`'s `app` section so
+  the window fills the screen (`set_view window_size` resizes but keeps its position). A dialog's
+  title bar, drawn by the compositor, is not in the video; its contents are.
 - Launching by hand on a fresh datadir: set `SSL_CERT_FILE` (the harness does), or a CA-bundle
   prompt blocks startup.
 
