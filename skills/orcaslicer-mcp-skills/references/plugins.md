@@ -128,7 +128,9 @@ Capability bases (each needs `get_name()`; look the rest up with `search_python_
   `.failure(orca.PluginResult.RecoverableError, message)`; the message is what the person sees.
 - **Hooks on any capability:** `on_load()`, `on_unload()`, and `on_lifecycle_event(self, event, ctx)`
   for project, slicing, object, plate, preset and printer events (`search_python_api {"query":"LifecycleEvent"}`
-  lists them; slicing events come on a background thread).
+  lists them; slicing events come on a background thread). A change made through the tools raises
+  them as the GUI's does (`new_project` sends `NewProject`), so a handler can be tested with tool
+  calls. [ref]
 - **Configuration:** `get_default_config()` returns a dict; `json.loads(self.get_config())` reads the
   saved one, `self.save_config(json.dumps(cfg))` writes it; the person edits it on the Config tab.
 - **Permissions** are declared in `register_capabilities()`:

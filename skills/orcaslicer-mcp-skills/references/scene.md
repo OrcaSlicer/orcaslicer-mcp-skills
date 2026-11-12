@@ -33,7 +33,10 @@ objects put together.
 
 ## Recipes
 
-- Load: `open_files {"paths":["/abs/a.stl"]}`; a `.3mf` opens as a project unless `"as":"geometry"`.
+- Load: `open_files {"paths":["/abs/a.stl"]}`; a `.3mf` opens as a project unless `"as":"geometry"`,
+  which adds its objects without its settings, as
+  `run_action {"id":"import_file","param":"/abs/p.3mf"}` does. An import is one undo step and leaves
+  the project with unsaved changes.
   Handy models: `run_action {"id":"add_handy_stanford_bunny"}` (also `3dbenchy`,
   `voron_cube`, `cali_cat`, `orca_badge`, `autodesk_fdm_test`, `orca_tolerance_test`). [ref]
 - Inch or metre model: `auto_answer_dialogs {"rules":[{"match":"too small","button":"yes"}]}` →
@@ -69,6 +72,11 @@ objects put together.
   `transform {"object":2,"plate":1}` (same spot on the other plate) → `list_plates {}`. [ref]
 - Arrange: `arrange {}` (every unlocked plate), `{"plates":1,"spacing":10,"rotate":false}` (one plate;
   the options stay saved as in the panel). It waits for the job and may renumber objects. [ref]
+  - It shows the Prepare view first, so it runs from the assemble view, and with a gizmo open, which
+    stays open, as `run_action {"id":"obj_arrange"}` does. `fill` selects its object, so it is refused
+    in the assemble view and while a gizmo is open. [ref]
+  - A locked or an empty plate given by index is refused; `arrange {}` leaves a locked plate out and
+    names it in `skipped_plates`. [ref]
 - Print order by object: see the trap below; order with
   `run_action {"id":"obj_order_by_name"}` (`_height`, `_size`, `_filament`; param
   `"all"` for every plate); the reply's `order` and `descending` say what it did. [ref]

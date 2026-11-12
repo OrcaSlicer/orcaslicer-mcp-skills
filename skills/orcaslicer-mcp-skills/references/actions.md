@@ -88,7 +88,7 @@ Screenshot commands (agents use `run_replay`, `run_script`, `start_recording`, `
 | `plate_add` |  | Add a plate. |
 | `plate_delete` |  | Delete the current plate. |
 | `plate_duplicate` |  | Duplicate the current plate. |
-| `plate_goto` | index: 0-based plate index | Make a plate the current one. |
+| `plate_goto` | index: 0-based plate index | Make a plate the current one; an index the project lacks is an error. |
 | `plate_rename` |  | Rename the current plate (opens a dialog). |
 | `plate_toggle_lock` |  | Lock or unlock the current plate. |
 
@@ -119,7 +119,7 @@ Screenshot commands (agents use `run_replay`, `run_script`, `start_recording`, `
 
 | key | param | does |
 |---|---|---|
-| `import_file` | path: absolute path of a model file | Import models (3MF/STL/STEP/SVG/OBJ/AMF). With a path, imports that file without a dialog. |
+| `import_file` | path: absolute path of a model file | Import models (3MF/STL/STEP/SVG/OBJ/AMF). With a path, adds that file's geometry without a dialog, as one undo step; a project file's settings are not loaded (load_project opens a project). |
 | `import_configs` | path: absolute path, or {"path": ..., "on_conflict": "overwrite"} to replace presets that exist already (default "skip") | Import presets. With a path, imports a preset .json, a .zip of them or an .orca_printer, .orca_filament or .orca_bundle without a dialog, and the message names the presets imported, replaced and kept; a .gcode loads the settings it was sliced with. |
 | `import_zip_archive` |  | Import models from a ZIP archive (opens a file dialog). |
 
@@ -127,14 +127,14 @@ Screenshot commands (agents use `run_replay`, `run_script`, `start_recording`, `
 
 | key | param | does |
 |---|---|---|
-| `go_to_layer` | percent: 0-100 | Show the Preview tab at a layer chosen as a percentage of the layer range. |
+| `go_to_layer` | percent: 0-100 | Show the Preview tab at a layer chosen as a percentage of the layer range; an error while the Preview has no layers (slice first). |
 | `go_to_tab` | tab: tab id: home, prepare, preview, monitor, project, calibration, or a plugin page id | Switch to a main window tab. |
 | `load_project` | path: absolute path of a .3mf project | Open a project. With a path, opens that file without a dialog (asks first if the current project has unsaved changes). |
 | `new_project` |  | Start a new, empty project (asks first if the current one has unsaved changes). |
 | `open_preferences` | text: general, files, behaviour, control, graphics, online or developer, optionally :<key>, e.g. behaviour:auto_arrange | Open the Preferences dialog on a tab, scrolled to one preference when given (shown on its own tab). Its controls are named after their preference keys: set_widget_value {"target": {"name": key, "within": "Preferences"}} changes one through the dialog; get_settings scope preferences reads them. |
 | `redo` |  | Redo the last undone change. |
 | `save_project` |  | Save the project to its current file (asks for a name if it has none). |
-| `save_project_as` | path: absolute output path, or {"path": ..., "overwrite": true} | Save the project as a .3mf file. With a path, saves there without a dialog. |
+| `save_project_as` | path: absolute output path, or {"path": ..., "overwrite": true} | Save the project as a .3mf file. With a path, saves there without a dialog; a name ending in .gcode.3mf is refused (export_sliced_file writes that). |
 | `undo` |  | Undo the last change to the project. |
 
 ## Calibration

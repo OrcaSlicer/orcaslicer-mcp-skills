@@ -6,6 +6,9 @@
   slot; it copies the last slot's preset) → `select_preset {"type":"filament","name":"…","filament_slot":2}`.
   Delete: `run_action {"id":"filament_delete","param":"2"}` (1-based; objects on it
   move). [ref]
+  - A filament assigned to a slot does what a pick in the slot's sidebar selector does: the slot takes
+    the preset's colour when the preset defines one, the flushing volumes are recalculated (while the
+    preference `auto_calculate_flush` is `all`, its default) and every plate's slice is invalidated. [ref]
 - Object or part filament: `set_settings {"scope":"object","object":1,"values":{"extruder":2}}`;
   a part `{"scope":"part","object":0,"part":1,"values":{"extruder":2}}`; `0`/`null` = Default.
   Read back: `list_objects` `filament` per object and part. [ref]
@@ -17,7 +20,7 @@
   V / `flush_multiplier` (read it first; 400 mm³ at 0.3 is 1333.33), and the G-code's
   `; flush_volumes_matrix` line shows the products; tower
   `{"wipe_tower_x":{"index":0,"value":150},"wipe_tower_y":{"index":0,"value":180}}` (per plate).
-  Set the matrix last: a colour change recalculates it. [ref]
+  Set the matrix last: a colour change, and a filament assigned to a slot, recalculate it. [ref]
 - First-layer filament order: `set_settings {"scope":"plate","plate":0,"values":
   {"first_layer_print_sequence":[2,1]}}` (every slot once). [ref]
 - Raised text in filament 2: `select_objects {"objects":[0]}` → `set_view {"camera":"top"}` →
@@ -65,6 +68,9 @@
 - `painted.mmu` in `list_objects` is facet counts per filament, with no location.
 - A filament change needs two or more slots and objects on one filament; a plate printed by object
   takes no layer codes.
+- A mixed-colour filament's slot (project scope `filament_is_mixed`) has no preset of its own:
+  `select_preset` with its `filament_slot` is refused, "Filament slot N is a mixed-color virtual slot,
+  which has no filament preset of its own." (`mixed_filament_slot`). [ref]
 
 ## Not possible
 

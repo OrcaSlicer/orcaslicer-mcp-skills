@@ -59,6 +59,18 @@
 - After an edit, a plate switch or `slice {"plates":"all"}`, `export` or `get_slice_stats` can refuse
   "Slicing is in progress": `wait {"for":"idle"}`, then repeat.
 - Any edit invalidates the slice: slice again before `get_slice_stats` or export.
+- A project with no objects still exports as `"3mf"` (and `export_3mf`): a design not yet committed
+  from the Design tab is one. `"gcode"`, `"sliced_3mf"` and `"stl"`, and the `export_gcode`,
+  `export_sliced_file`, `export_all_sliced_file` and `export_stl` commands, are refused with "The
+  project has no objects." (`no_objects`). [ref]
+- `save_project` and `run_action save_project_as` refuse a path ending in `.gcode.3mf`
+  (`sliced_file_name`): a project is saved without G-code, and that file is
+  `export {"format":"sliced_3mf","path":"/abs/x.gcode.3mf"}`. [ref]
+- `set_view` with `layer`, `layer_range` or `layer_z`, and `run_action go_to_layer`, are refused with
+  "The preview has no layers. Slice the plate first." (`no_layers`) until a slice has given the
+  Preview layers. From then on the Preview keeps the last slice's layers, also after the objects are
+  deleted or a new project is started, and the reply's `layers` (`[first, last, count]`) is of that
+  slice: slice the plate before pointing the view at a layer. [ref]
 - A by-object plate needs objects ≥ `extruder_clearance_radius` apart (`references/scene.md`).
 - Opening a `.gcode` file to view it asks to save the project even with `discard_changes`:
   auto-answer `{"match":"unsaved changes. Would you like to save","button":"no"}` first.

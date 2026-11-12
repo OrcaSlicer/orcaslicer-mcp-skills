@@ -83,10 +83,13 @@ Contour `external`, Painted only `none`, noise `"perlin"`; overhang 50–75 % `o
 ## Traps
 
 - `select_preset` printer silently changes process and filaments: re-read `get_app_state.presets`.
+- A printer or process `select_preset` that ends on another preset than the one asked for is an error
+  naming both (`"B" was selected instead of "A".`, `other_preset_selected`), and B stays selected.
 - `new_project {"discard_changes":true}` keeps modified presets (its reply lists them under
   `modified`); add `"preset_changes":"discard"` to drop them.
 - `list_presets` leaves out presets that aren't installed unless `"include_hidden":true`; a name that
-  isn't there at all, or a preset that doesn't suit the selected printer, is refused with that reason.
+  isn't there at all (`preset_not_offered`, with the closest names in `similar`), or a preset that
+  doesn't suit the selected printer (`preset_incompatible`), is refused with that reason.
 - A key of another scope is refused, naming the scope to pass (`"k" is a filament setting`).
 - PETG on the X1C's default Cool Plate fails to slice: set Textured PEI first. PETG + a PLA support
   filament fails ("nozzle temperatures are incompatible") unless the preference

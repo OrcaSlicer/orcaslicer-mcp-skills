@@ -89,6 +89,11 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
     before it opens. A picker's rule can hand it the file:
     `{"match":"<its prompt>","button":"ok","path":"/abs/file"}` (on Linux, or without `path`, the rule
     cancels the picker).
+- **Refusals:** a failed call's error is its reason; where the app refused what was asked, a second
+  line of JSON details follows with a stable `code`: `The project has no objects.` then
+  `{"code":"no_objects"}`. A Speed Dial command and the tool that does the same thing refuse the same
+  states with the same words and code (a tool may add a hint after them), so `run_action` relays what
+  the tool would say. Tell cases apart by the `code`, not the wording.
 - **Indices shift** after arrange, split, cut, assemble, change of part type, order by and a CAD
   commit: re-read `list_objects`. Its `id` beside the index guards a call:
   `transform {"object":1,"object_id":732,…}` (`select_objects {"objects":[1],"object_ids":[732]}`) is refused
@@ -103,7 +108,8 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
   edits opens a prompt unless `"preset_changes":"transfer"|"discard"`.
 - **A sliced file is not a project.** A "plate sliced file", "print from SD card" or a `.gcode.3mf`
   name means `export {"format":"sliced_3mf","plates":"all"|N,"path":"/abs/x.gcode.3mf"}` after
-  slicing. `save_project` writes no G-code, whatever the file is called.
+  slicing. `save_project` writes no G-code and refuses a name ending in `.gcode.3mf`, as
+  `run_action save_project_as` does.
 - **Slice numbers:** `filament_g` includes flush; `filaments[i]` (slot i+1) splits `model_g`,
   `support_g`, `flush_g`, `tower_g`. Feature times, per-layer times and the highest flow are in
   `get_slice_stats`. Any edit invalidates the slice: slice again before reading or exporting.

@@ -37,6 +37,8 @@ waits until the app is ready and prints the session: `url`, `port`, `token`, `pi
   each its own `ORCA_MCP_SESSION` file and `--port`.
 - Arguments after `--` go to the app. `tools/mcp/orca_mcp.py stop` ends the app and its private
   display.
+- Launch from a folder that holds no `.py` files: the app's working directory is on Python's module
+  path, so a file there can shadow a standard module that `run_script` needs.
 - Startup problems go to `<datadir>/mcp-launch.log`; at run time `get_log {"level":"warning"}`.
 
 Talk to the app in two ways:
@@ -117,6 +119,10 @@ and `mcp_tools_broken` (a load that fails).
   fill), other changes are refused; `wait` for its job or `cancel_job` it. A job a person started (typing
   in the Text gizmo) refuses changes too; reads still answer.
 - A Speed Dial command that did nothing is an error with the reason.
+- A command, the tool that does the same thing and the plugin API's preset calls go through one
+  function of the operations layer (`src/slic3r/GUI/Operations/`), so every route accepts and refuses
+  the same states, with one wording and a `code` on the line after it (`docs/HLSD/mcp-server.md`,
+  "The operations layer").
 - wx dialogs take `answer_dialog` or an auto-answer, which presses the button and runs its handler;
   their `message` reads their controls (SKILL.md, "Dialogs"). A native message box takes
   `answer_dialog` on Windows and Linux. A file or folder picker, and any native dialog on macOS, only
@@ -144,13 +150,20 @@ shapes. Run one with `tools/mcp/orca_mcp.py run-replay tools/mcp/tests/<name>.js
   `webview_modal.json`, `web_dialogs.json` (web pages driven like widgets), `agent_forms.json`
   (argument names and forms agents often write), `recording.json` (needs an ffmpeg with libx265 and
   libx264);
+- `ops_*.json`, one per operation of the operations layer, each driven through every route that
+  reaches it (the command, the tool and, for presets, a pick in the sidebar and the plugin API): they
+  record what each call leaves, and `result.json` keeps the refusals' texts to compare between two
+  builds. The preset ones need a freshly launched app, and those whose commands write files a fresh
+  `--out`;
 - with `--cad`: `cad_sketch_to_solid.json`, `cad_sketch_edit.json`, `cad_topology_targets.json`,
   `cad_features.json`, `cad_doc.json`, `cad_canvas.json`.
 
 Harness tests (`tools/mcp/test_*.py`, each against the launched instance): `test_stdio_bridge.py`,
 `test_recovery_under_load.py`, `test_cancel_pending_slice.py`, `test_ref_locator_export.py`,
 `test_worker_admission.py`, `test_export_running_job.py` (about 2 min), `test_send_gcode.py` (stub
-host), `test_set_view_preview.py`, `test_set_view_camera.py`, `test_set_window.py`,
+host), `test_operation_routes.py` (a command, its tool and the plugin API accept and refuse the same
+states in the same words; on a freshly launched app), `test_set_view_preview.py`,
+`test_set_view_camera.py`, `test_set_window.py`,
 `test_list_windows.py`, `test_webview_modal.py`, `test_action_replay_hidden.py`, and with `--cad`
 `test_cad_replay.py`, `test_cad_slow_build.py`, `test_cad_failed_job.py`, `test_cad_examples.py` (every
 CAD tool's examples) and the Design tab's GUI tests `test_cad_sketching.py`, `test_cad_click_edit.py`
@@ -158,13 +171,15 @@ and `test_cad_context_menu.py`.
 `test_web_ui.py` drives a fixture plugin's pages: `test_web_ui.py --install DIR`, launch with
 `--datadir DIR`, then run it. `test_plugin_tools.py` (a plugin's calls into the tools) launches its own
 instances, and `test_orca_mcp_attach.py` (how the harness attaches to a running app) needs none.
-Unit tests: `tests/slic3rutils/test_mcp_*.cpp` (`ctest --test-dir ./tests/slic3rutils -C Release`),
-tags `[Mcp]`, `[Mcp][CAD]`.
+Unit tests: `tests/slic3rutils/test_mcp_*.cpp` and `test_operations.cpp`
+(`ctest --test-dir ./tests/slic3rutils -C Release`), tags `[Mcp]`, `[Mcp][CAD]`, `[Operations]`.
 
 A new feature MCP should reach: a Speed Dial command in `NativeCommands.cpp` (key, description,
 `Path` param that skips its dialog) is enough for most; a typed tool in the matching
-`McpTools*.cpp` when it needs structured arguments or results (`docs/HLSD/mcp-server.md`, "Making a
-feature reachable").
+`McpTools*.cpp` when it needs structured arguments or results. What the command or tool does (its
+checks, its refusals and their wording, its undo snapshot) goes into an operation in
+`src/slic3r/GUI/Operations/` that both call (`docs/HLSD/mcp-server.md`, "Making a feature
+reachable" and "The operations layer").
 
 ## Linux display notes
 

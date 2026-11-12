@@ -44,8 +44,9 @@ run a replay too.
   A replay's `wait {"for":"idle"}` doesn't wait for the replay itself.
 
 The reply, also written to `<out_dir>/result.json`:
-`{passed, name, failed_step, steps:[{index, tool, args, ok, duration_ms, result | error, expect_failure, reason}], out_dir, result_file}`.
-A failed step's `reason.kind` says why: `tool` (the tool's own error), `expect` (with `pointer`, `op`,
+`{passed, name, failed_step, steps:[{index, tool, args, ok, duration_ms, result | error, details, expect_failure, reason}], out_dir, result_file}`.
+A failed step's `reason.kind` says why: `tool` (the tool's own error: `error` has its text and
+`details` a refusal's `code`, which no `expect` can check), `expect` (with `pointer`, `op`,
 `expected`, `actual`), `expect_invalid`, `python` (a `run_script` step that raised, was cancelled or
 timed out), `timeout`, `cancelled`, `placeholder`, `missing_job`. `run_replay` itself returns a job when
 the run outlasts the reply budget: `wait` for it.
