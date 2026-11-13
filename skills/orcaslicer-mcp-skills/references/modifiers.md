@@ -35,7 +35,7 @@
 - Split into parts: `select_objects {"objects":[0]}` → `run_action {"id":"obj_split_parts"}`;
   into objects: `obj_split_objects`. [ref]
 - Rename an object or part: `select_objects {"objects":[0]}` (or `{"parts":[[0,1]]}`) →
-  `run_action {"id":"obj_rename","param":"tall"}`. [ref]
+  `run_action {"id":"obj_rename","args":{"name":"tall"}}`. [ref]
 - Move or resize a part: `transform {"object":0,"part":1,"translate":[100,100,15],"mode":"absolute"}`
   (the part's centre on the bed), `"size":[null,null,3]`, `"scale":2`; rotation relative only. [ref]
 - Copy settings to another object: read the source's overrides (`get_settings` object scope) and

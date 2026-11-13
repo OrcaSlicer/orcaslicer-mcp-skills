@@ -11,14 +11,15 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
    load what the task needs in one call, for example
    `select:mcp__orcaslicer__get_app_state,mcp__orcaslicer__list_objects,mcp__orcaslicer__set_settings,mcp__orcaslicer__get_settings,mcp__orcaslicer__slice,mcp__orcaslicer__export`;
    add `transform`, `add_part`, `arrange`, `select_objects`, `run_action` for scene work, `select_preset`,
-   `save_preset`, `list_presets` for presets, `search_tools` when unsure what does something,
-   `run_script`, `search_python_api`, `run_replay`, `call_tool` for scripts, replays and plugins,
-   `list_cad_tools`, `describe_cad_tool`, `call_cad_tool` for the Design tab, and `list_widgets`,
+   `save_preset`, `list_presets` for presets, `search_tools` and `call_tool` when unsure what does
+   something and for the commands the tool list doesn't show (the Design tab's, plugin operations),
+   `run_script`, `search_python_api`, `run_replay` for scripts and replays, and `list_widgets`,
    `click`, `set_widget_value`, `mouse_gesture`, `wait`, `answer_dialog`, `auto_answer_dialogs` only
    for gizmos and dialogs: every loaded schema costs on every call.
 2. Call `get_app_state`: ready, tab, presets, objects, plates, the `selection`, open `dialogs`, the open
    `gizmo`, `jobs`, whether Python scripts run unrestricted (`python.scripts_unrestricted`) and whether
-   the Design tab is on (`design_tab`).
+   the Design tab is on (`design_tab`; when its commands don't run, `cad_note` says how the person
+   turns it on).
 3. **No OrcaSlicer tools at all** means the app is not connected: the user turns on Preferences >
    General > AI features > MCP server and adds it ("Add to an agent"); in an OrcaSlicer checkout, read
    `references/development.md`.
@@ -27,14 +28,40 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
 
 - **Typed tools first,** then `run_action`, and the GUI tools (`list_widgets`, `click`,
   `set_widget_value`, `press_keys`, `mouse_gesture`) last.
-  - A Speed Dial action is its key with a string param:
-    `run_action {"id":"add_primitive_cube","param":"40 40 10"}`. The keys are in
-    `references/actions.md`; object commands act on what `select_objects` picked.
+  - A Speed Dial command is its key with its arguments as an object:
+    `run_action {"id":"add_primitive_cube","args":{"size":[40,40,10]}}`. The commands and their
+    arguments are in `references/actions.md`; object commands act on what `select_objects` picked.
+    It lists every command a person can pick. Some are the person's own and have a tool for
+    agents: Action Replay `run_replay`, Run Script `run_script`, Take Screenshot (a PNG where
+    recordings go, Downloads by default) `screenshot`, the calibration dialogs
+    `generate_calibration_test`. Leave the wiki and YouTube links (`open_wiki`, `open_youtube`),
+    About (`help_about`), the plugin hub (`install_plugin`) and the configuration folder
+    (`help_open_config_folder`) to the person. A Design tile runs through `run_action` only while
+    the Design tab is shown in the tile's mode (in a sketch or outside one); `call_tool` runs its
+    command from any tab (`references/cad.md`).
+  - **No arguments is the person's form.** A command whose schema has `silent`, or whose
+    description says what it does with no arguments, does what a person's pick does when called
+    with none: one that asks opens its dialog (`blocked_by_dialog`), and a Design command with a
+    menu row does what the row does, which can be to open a card, to decline, or to act at once on
+    the selection (a Delete row deletes it). Given its arguments, it runs without asking:
+    `run_action {"id":"export_gcode"}` opens the file dialog,
+    `run_action {"id":"export_gcode","args":{"path":"/abs/x.gcode"}}` writes the file.
+    `"silent":true` alone runs one whose schema has `silent` and whose other arguments all have
+    defaults; one with a required argument is given that argument instead
+    (`save_project {"silent":true}` is refused, "path is required"). A Speed Dial command without
+    `silent` refuses it as an unknown argument. The tools `new_project`, `save_project`,
+    `start_recording` and `stop_recording` work the same way: `stop_recording {"silent":true}`
+    waits for the file and reports it, `stop_recording {}` is the person's Stop.
+  - Two kinds of command fall outside that rule. One whose schema requires an argument has no
+    person's form: `go_to_tab {}` is refused ("tab is required"). One whose dialog is what it does
+    opens it with arguments too: `export_config {"path":"/abs/dir"}` opens the export dialog, and
+    the path only spares it the folder question.
   - Not sure which tool, action, setting or plugin operation does something:
-    `search_tools {"query":"<a few words>"}` searches them all at once, with the Python API and the
-    Design tab's CAD tools, each match with how to use it;
-    `call_tool {"tool":"plugin.<plugin>.<name>","args":{…}}` runs an operation a plugin offers, which
-    the tool list doesn't show.
+    `search_tools {"query":"<a few words>"}` searches them all at once, with the Python API, each
+    match with how to use it. It finds every command, also those the tool list doesn't show (the
+    Speed Dial's, the Design tab's and the operations plugins offer, `plugin.<plugin>.<name>`), with
+    such a one's input schema; `{"tool":"<name>"}` gives one's description, schema and examples,
+    `{"group":"Design"}` the names in a group. `call_tool {"tool":"<name>","args":{…}}` runs any of them.
 - **Exact shapes** (these are what runs got wrong):
   - One camera per call: `set_view {"camera":"top"}`, then `set_view {"camera":"fit_selection"}`.
     Between the named directions: `set_view {"camera":"front","orbit":[30,20]}` (yaw, pitch in degrees),
@@ -128,7 +155,7 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
   `slice {"plates":"all"}`: `wait {"for":"idle"}`, then repeat.
 - **Prompts to pre-answer:** "too small" (inch model) → yes; STEP "import parameters" → ok, "floating
   parts" → no; spiral mode → yes; opening a `.3mf` over modified presets: "unsaved changes" →
-  Discard; after Design-tab edits, "save before continuing" → no (the project reads not dirty).
+  Discard.
 - **Object overrides:** `get_settings {"scope":"object","object":N}` lists the overrides with
   `effective` and `source`; `"values":{"brim_type":null}` removes one. Only keys the object list
   offers there are taken.
@@ -169,7 +196,7 @@ verified on the current build, **[hand]** verified by hand only; `→` means the
 | Python scripts and macros: computing over objects, meshes and settings, loops of tool calls, windows that ask the person, the `orca` API | `references/python.md` |
 | Replays of tool calls: sending many calls at once, answering the dialogs they open, `expect` checks, `export_replay` | `references/replays.md` |
 | Plugins: running an installed plugin's commands, pages and operations, the Plugins dialog, permission prompts; writing, installing, reloading and debugging a Python plugin | `references/plugins.md` |
-| Speed Dial ids | `references/actions.md` |
+| Speed Dial commands: keys, arguments, what each does | `references/actions.md` |
 | Reading a saved project file | `references/project-file.md` |
 | Launching OrcaSlicer with MCP, reproducing issues, replays, tests, platform notes | `references/development.md` |
 

@@ -1,10 +1,60 @@
 # Design (CAD) tab
 
-Every call is `call_cad_tool {"tool":"<name>","args":{...}}`; the recipes below write it short, as
-`<name> {args}`, and its reply is `{"result":{…}}`. The CAD feature must be on (Preferences >
-Features, then a restart; `get_app_state.design_tab` says so). Look up a tool's arguments and
-examples with `describe_cad_tool {"tool":["extrude","hole"]}`, and find one with
-`list_cad_tools {"query":"sketch"}` (no query: all 80, a line each).
+The Design tab's commands are not in the tool list: every call is
+`call_tool {"tool":"<name>","args":{...}}`, which the recipes below write short, as `<name> {args}`,
+and its reply is `{"result":{…}}`. A replay step or a script's `orca.host.tools.call` names the
+command itself (`{"tool":"extrude","args":{…}}`). The CAD feature must be on (Preferences >
+Features, then a restart; `get_app_state.design_tab` says so, and `cad_note` how to turn it on).
+Look up a command's arguments and examples with `search_tools {"tool":"extrude"}`, find one with
+`search_tools {"group":"Design","query":"sketch"}` (each match with its schema), and list every
+name with `search_tools {"group":"Design"}`.
+
+## Two forms
+
+- Given arguments, a command runs at once, as the recipes do. Given none, a command with a row in
+  the Design tab's right-click menu does what that row does for a person: it opens a
+  feature card or a dialog, starts a sketch tool, acts at once, or declines. The reply is
+  `{"result":{"interactive":true,"tool":…,"applies":…,"modal":…,"selection_kind":…,"busy":…,"status":…}}`
+  and claims nothing about which: `busy` names the card, dialog or sketch left open (null when
+  none) and `status` is the tab's status line afterwards. [ref]
+  - A card: with a committed sketch, `extrude {}` opens the Extrude card
+    (`"busy":"a feature card is open in the Design tab"`), from any tab, and every change command is
+    refused ("Design tab busy: a feature card is open in the Design tab") until the card closes:
+    `set_view {"tab":"design"}`, then `click {"target":{"label":"Cancel"}}` (the Design ribbon's
+    Cancel, which no other tab shows). [ref]
+  - A dialog: `sk_text {}` opens the modeless Text dialog and returns with it open (`"modal":false`,
+    `busy` names it; `click {"target":{"label":"Cancel","within":"Text"}}` closes it), while a row
+    whose dialog is modal (`colour`, `sk_svg`) holds the call, which replies `blocked_by_dialog` with a
+    job first, as any command that asks does; `sk_svg`'s file picker is native, so register an
+    `auto_answer_dialogs` rule before calling it (SKILL.md, Dialogs). [ref] `colour {}` opens the
+    system's colour picker, which `answer_dialog` does not close on Windows: colour a body with
+    `body_set {"body":…,"color":"#rrggbb"}` instead.
+  - Declined: on an empty design `extrude {}` builds nothing, with `"busy":null` and
+    `"status":"✗ Create a sketch, or pick a solid face, first"`.
+  - A sketch tool: in a sketch `sk_rect {}` arms the rectangle tool (`busy` names the open sketch,
+    `status` the tool's hint), for the person's clicks.
+  - At once: a row that acts on the selection asks nothing. A Delete row (`delete`, `delete_body`,
+    `sk_delete`) deletes what is selected; `sk_delete {}` with a sketch line selected removes it.
+    Read the design back (`describe_scene`, `sketch_describe`) to see what such a call changed.
+- A command that has both forms (`silent` in its schema) and whose other arguments all have
+  defaults takes `{"silent":true}` alone to run with them: `extrude {"silent":true}` builds the
+  default 20 × 20 × 10 mm box. One with a required argument is given that argument, which runs it
+  silently too: `fillet {"silent":true}` is refused ("edge is required"),
+  `fillet {"edge":[0],"radius":1,"body":0}` builds. [ref]
+- Called with no arguments, a row runs only in its mode: a model tool in an open sketch is refused
+  ("finish or cancel the sketch first", `mass_props {}`), a sketch tool (`sk_rect`, `sk_circle`…)
+  outside one ("open a sketch first"). One that only the right-click menu offers is refused for a
+  selection it doesn't take, with `accepts` and the `selection` in the error (`mass_props {}` with
+  nothing selected); `describe_scene`'s `selection` is what is selected. [ref]
+- Given arguments, a command goes by what it does, not by mode: a read runs in an open sketch too
+  (`mass_props {"body":0}`); a change to the model is refused while a sketch, card or dialog is
+  open ("Design tab busy: a sketch is open in the Design tab" for
+  `fillet {"edge":[0],"radius":1,"body":0}` in a sketch); the sketch commands work on the open
+  sketch. [ref]
+- `search_tools {"tool":…}` shows which form a command has: `silent` in its schema for both; no
+  arguments at all for one that only does what its row does (`sk_rect`, `sketch`, `delete`);
+  neither for one with a silent form only, which runs whatever it is given (`sketch_begin`,
+  `query_topology`, `commit`).
 
 ## Frames
 
@@ -48,7 +98,7 @@ examples with `describe_cad_tool {"tool":["extrude","hole"]}`, and find one with
   `pattern {"circular":true,"count":6,"angle":360}` (copies go into the last body) →
   `boolean {"op":"union","target":0,"tool":1}`. [ref] A bolt circle of holes: one `hole` per
   computed x, y.
-- Variables: `set_variable {"name":"w","expr":"30"}` → `set_feature_expr {"feature":0,"field":"width","expr":"w"}`
+- Variables: `set_variable {"name":"w","expr":"30"}` → `edit_feature {"feature":0,"field":"width","expr":"w"}`
   (a box extrude's width is on its Sketch, feature 0) → `set_variable {"name":"w","expr":"45"}`;
   `describe_scene` lists `variables` and each feature's `bound` fields. [ref]
 - Edit an existing design: `describe_scene` → `describe_feature {"feature":1}` (`params`, `editable`,
@@ -59,12 +109,15 @@ examples with `describe_cad_tool {"tool":["extrude","hole"]}`, and find one with
   datum → `loft {"profiles":[1,2]}`. Split: `split {"plane":"XY","offset":10}` (`flip`,
   `keep_upper`/`keep_lower`).
 - Imported parts: `import_step {"path":…}`, `import_mesh {"path":…}`; check with
-  `mass_properties {"body":0}` (`volume`), `measure {"a":{"face":14,"axis":true},"b":{"face":10}}`
+  `mass_props {"body":0}` (`volume`), `measure {"a":{"face":14,"axis":true},"b":{"face":10}}`
   (`min_distance`), `query_topology` radii.
 - Commit to the plate: `commit {}` (one object; `"mode":"bodies"` one per body;
   `"replace":[i]` deletes those Prepare objects in the same undo step, e.g. the stale object of an
   earlier commit) → `list_objects`. `export_step {"path":"/abs/x.step","overwrite":true}`. [ref]
-- History: `undo` / `redo` (the Design history; `run_action undo` is Prepare's); `feature_delete`,
+- Move or turn a body: `body_transform {"body":0,"dx":30}` (`dy`, `dz`; `angle` about
+  `axis_x/y/z` through `pivot_x/y/z`; `"copy":true` adds the moved copy as a new body). [ref]
+- History: `undo {"history":"design"}` / `redo {"history":"design"}` (reply `history` and `result`
+  with `undo_depth`, `redo_depth`; inside a sketch it takes back the last shape drawn); `feature_delete`,
   `feature_move {"feature":2,"delta":-1}`, `feature_set_enabled`, `feature_rename`;
   `body_set {"body":1,"name":"Lid","color":"#3080ff","visible":false}` (a hidden body is not
   committed), `body_delete`. `new_design {"discard_changes":true}` starts over.
@@ -73,16 +126,22 @@ examples with `describe_cad_tool {"tool":["extrude","hole"]}`, and find one with
 ## Traps
 
 - A sketch line's ends are `p0` and `p1`; `start`/`end` is refused.
-- The tools whose `failure` is `reply` in `describe_cad_tool` (`fillet`, `chamfer`, `boolean`,
-  `pattern`, `shell`, `mirror`, `set_variable`, `set_feature_expr`, `import_*`…) answer
-  `{"result":{"ok":false,"error":…}}` instead of failing: check `ok`.
-- A CAD tool is not a tool of its own: calling `extrude` directly, or through `call_tool` or
-  `run_action`, is refused with the `call_cad_tool` form.
+- The commands whose description says "A rejected rebuild is reported in the reply" (`fillet`,
+  `chamfer`, `boolean`, `pattern`, `shell`, `mirror`, `body_transform`, `set_variable`,
+  `edit_feature`, `import_*`, the surface tools…) answer `{"result":{"ok":false,"error":…}}` instead
+  of failing: check `ok`.
+- `undo` and `redo` without `history` act on the tab shown: driving the Design tab from Prepare, a
+  bare `undo {}` takes back a project change. Pass `"history":"design"`.
+- A command with a menu row, called with no arguments, does what the row does, not its silent
+  form: it may open a card, decline, or act on the selection at once, and a Delete row deletes
+  with no prompt (Two forms above). To build, pass the arguments, or `{"silent":true}` where
+  nothing else is required.
+- `run_action` reaches a Design tile only while the Design tab is shown in the tile's mode;
+  `call_tool` reaches every Design command from any tab, the tab need not be shown.
 - Face and edge ids from `query_topology` expire when the model rebuilds; deleting or moving features
   renumbers features and bodies.
-- Design-only edits leave `get_app_state.project.dirty` false, yet opening another project with
-  `open_files {"discard_changes":true}` can still ask "save before continuing": auto-answer
-  `{"match":"save before continuing","button":"no"}` first.
+- Design-only edits mark the project modified (`get_app_state.project.dirty`), so `new_project`
+  and `open_files` after them need `"discard_changes":true`. [ref]
 - Commit appends: without `replace`, the earlier committed object stays on the plate.
 
 ## Not possible

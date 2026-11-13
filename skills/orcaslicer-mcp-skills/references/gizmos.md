@@ -23,7 +23,7 @@ Typed neighbours: variable layer height is `set_variable_layer_height`, parts an
   `click {"target":{"gizmo":"Text"}}` → Text / Height / Depth as in `references/multicolor.md` →
   `click {"target":{"imgui":"Cut"}}` → wait idle → Done → wait idle; the part is `negative`. [ref]
 - SVG on top: `set_view {"camera":"top"}` → `set_view {"camera":"fit_selection"}` →
-  `run_action {"id":"add_primitive_svg","param":"/abs/star.svg"}` → wait idle →
+  `run_action {"id":"add_primitive_svg","args":{"path":"/abs/star.svg"}}` → wait idle →
   `set_widget_value {"target":{"imgui":"Depth"},"value":0.6}` → `set_widget_value {"target":{"imgui":"Size"},"value":50}`
   → wait idle → `click {"target":{"gizmo":"SVG"}}` (close) →
   `set_settings {"scope":"part","object":0,"part":1,"values":{"extruder":2}}` for a second colour. [ref]

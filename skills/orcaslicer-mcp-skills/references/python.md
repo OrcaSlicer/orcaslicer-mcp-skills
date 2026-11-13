@@ -51,7 +51,7 @@ comes back as `output`. A run that outlasts the reply budget replies `{"status":
 | Preset values | `b = orca.host.preset_bundle()`; `b.full_config_value(key)` (the merged settings slicing uses), `b.current_process_preset()`, `b.current_printer_preset()`, `b.current_filament_presets()`, each `config_value(key)`; values are strings |
 | Change settings | `orca.host.tools.call("set_settings", {...})`, as an agent does; or `orca.host.preset.process.update(key, "value")` (`.printer`, and `.filament.update(slot, key, value)` for a 1-based slot), the edit path the GUI's fields take |
 | Edit another preset | `t = orca.host.preset.process.begin_update("<name>")` (`.printer`; `.filament.begin_update(slot, "<name>")`), then `t.set(key, "value")` and `t.commit()`. The name is selected first, as `select_preset` selects it: by the name its selector shows or its internal name, a hidden preset shown first, a filament assigned to its slot as a pick in the sidebar (`references/multicolor.md`). `ValueError` for a name the selector doesn't offer and for a mixed-colour slot, `IndexError` for a slot the printer lacks, `RuntimeError` when the tab ends on another preset. Over unsaved edits the Transfer-or-discard prompt opens and `run_script` replies `blocked_by_dialog`: answer it, then wait for the job |
-| Tools | `orca.host.tools.call(name, args)` → the reply as a dict; `orca.host.tools.run_replay(replay, vars)` runs a replay (`references/replays.md`); a failed call raises `orca.host.tools.ToolError` (`str(e)` its message, `e.details` its data: a refusal's `code`, as in `e.details.get("code") == "no_objects"`) |
+| Tools | `orca.host.tools.call(name, args)` → the reply as a dict, for any command `search_tools` finds (the Speed Dial's and the Design tab's by their key); `orca.host.tools.run_replay(replay, vars)` runs a replay (`references/replays.md`); a failed call raises `orca.host.tools.ToolError` (`str(e)` its message, `e.details` its data: a refusal's `code`, as in `e.details.get("code") == "no_objects"`). `orca.host.tools.list()` lists every command as `{name, title, group, description, read_only, listed}`; `orca.host.tools.describe(name)` gives one with its `input_schema` and `examples` (an unknown name raises `ToolError`, `details["did_you_mean"]`) |
 | Ask the person | `orca.host.ui.message(text, title, buttons="yes_no", icon="question")` → `"yes"`…; `create_window(html, title, width, height, on_message=…)` (modeless by default); `create_progress_dialog(title, message, maximum)` → `update(value, message)`; `push_notification(orca.host.ui.NotificationLevel.RegularNotificationLevel, text)` |
 | The project | `orca.host.plater()`: `is_project_dirty()`, `is_presets_dirty()`. Its `project_path()` and `export_3mf_copy(path)` are UI thread only, so a script reads the path from `orca.host.tools.call("get_app_state", {})["project"]["path"]` and writes a copy with the `export` tool (`"format":"3mf"`) |
 
@@ -64,7 +64,7 @@ comes back as `output`. A run that outlasts the reply budget replies `{"status":
   t = orca.host.tools
   t.call("new_project", {"discard_changes": True})
   for i in range(args["n"]):
-      t.call("run_action", {"id": "add_primitive_cube", "param": f"10 10 {5 * (i + 1)}"})
+      t.call("run_action", {"id": "add_primitive_cube", "args": {"size": [10, 10, 5 * (i + 1)]}})
       t.call("select_objects", {"none": True})       # a primitive is refused while something is selected
   t.call("arrange", {})
   m = orca.host.model()
@@ -103,7 +103,7 @@ comes back as `output`. A run that outlasts the reply budget replies `{"status":
           title="Cube height", width=300, height=160, on_message=answers.put)
       h = float(answers.get()["h"])          # waits until the person presses Go
       orca.host.tools.call("select_objects", {"none": True})
-      orca.host.tools.call("run_action", {"id": "add_primitive_cube", "param": f"10 10 {h}"})
+      orca.host.tools.call("run_action", {"id": "add_primitive_cube", "args": {"size": [10, 10, h]}})
       global result
       result = {"height": h}
 

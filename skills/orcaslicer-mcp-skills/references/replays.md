@@ -30,9 +30,11 @@ run a replay too.
 - **Placeholders:** `${replay_dir}`, `${out_dir}`, `${env:NAME}`, `${vars.NAME}`, `${jobs.NAME}`, in any
   string; a string that is just one placeholder becomes the value itself (`"${vars.walls}"` is the
   number 2). A `run_script` step's `code` is never substituted.
-- **Steps:** `tool`, `args`, `expect`, `optional`, `await`, `save_as`, `timeout_s`. A step that returns
-  a job is awaited (up to `timeout_s`, default 120) before its `expect`. A step that opens a dialog:
-  `"await": false, "save_as": "x"`, then the steps that answer it, then `wait` job `${jobs.x}`.
+- **Steps:** `tool`, `args`, `expect`, `optional`, `await`, `save_as`, `timeout_s`. `tool` names any
+  command, also one the tool list doesn't show (a Speed Dial or Design command by its key). A step
+  that returns a job is awaited (up to `timeout_s`, default 120) before its `expect`. A step that
+  opens a dialog: `"await": false, "save_as": "x"`, then the steps that answer it, then `wait` job
+  `${jobs.x}`.
 - **expect:** a JSON pointer into the step's reply → matchers `eq ne gt ge lt le contains regex exists
   empty`, several per pointer. `expect` values are not substituted: check a var through the step's
   `args` instead.
@@ -58,9 +60,9 @@ the run outlasts the reply budget: `wait` for it.
   ```json
   {"orca_replay": 1, "name": "cubes", "steps": [
     {"tool": "new_project", "args": {"discard_changes": true}},
-    {"tool": "run_action", "args": {"id": "add_primitive_cube", "param": "20 20 10"}},
+    {"tool": "run_action", "args": {"id": "add_primitive_cube", "args": {"size": [20, 20, 10]}}},
     {"tool": "select_objects", "args": {"none": true}},
-    {"tool": "run_action", "args": {"id": "add_primitive_cylinder", "param": "10 15"}},
+    {"tool": "run_action", "args": {"id": "add_primitive_cylinder", "args": {"size": [10, 15]}}},
     {"tool": "arrange", "args": {}},
     {"tool": "list_objects", "expect": {"/total": {"eq": 2}}}
   ]}
@@ -85,9 +87,15 @@ the run outlasts the reply budget: `wait` for it.
   its JSON.
 - A replay runs against the project as it is then: start it with `new_project` or `open_files`
   when it depends on the scene.
-- Native file pickers can't be answered by a step: use the tool or the Speed Dial `path` param that
+- Native file pickers can't be answered by a step: use the tool, or the command's `path` argument that
   skips the picker, or an `auto_answer_dialogs` rule registered before the step that opens it, which
   hands it a `path` or cancels it.
+- A step with no `args` is the person's form of a command that has one (SKILL.md): it may open the
+  command's dialog or a Design card, start a sketch tool, decline, or act at once on the selection
+  (`{"tool":"delete_body"}` deletes the selected body with no prompt; `references/cad.md`, "Two
+  forms"). Give such a step its arguments, or `"silent": true` where the schema has `silent` and
+  nothing else is required (`delete_body` has no `silent` and refuses it); `export_replay` keeps
+  them, so a call that ran silently replays silently.
 
 ## The person's Action Replay window
 

@@ -12,7 +12,8 @@ tab or post-processing step that stays in the app.
   commands (`kind: "plugin"`, id `plugin_script_action:<capability>:<plugin key>`) and pages
   (`plugin_page_action:<capability>:<plugin key>`). `search_tools {"query":"<words>"}` also lists the
   operations plugins offer agents, `plugin.<plugin key>.<name>` with their schema; `search_tools {}` lists
-  every name. Neither kind is in the tool list.
+  every name. Neither kind is in the tool list. A script command or page takes no arguments:
+  `run_action` refuses `args` for one.
 - **Run a script command:** `run_action {"id":"<capability name>"}` (or the full id) →
   `{"message":"Script plugin started."}`. It runs on its own; its result arrives as a notification:
   find its message in `get_app_state.notifications` (in no fixed order; an error one has `level: "error"`
@@ -108,7 +109,7 @@ class ReportTallest(orca.script.ScriptPluginCapabilityBase):
 class TallestObject(orca.base):
     def register_capabilities(self):
         orca.register_capability(ReportTallest)
-        # Offered to agents and scripts as plugin.<key>.tallest once the person allows it.
+        # Offered to agents and scripts as plugin.<key>.tallest, with no prompt.
         orca.register_operation("tallest", "The tallest object's name and height in mm.",
                                 {"type": "object", "properties": {}}, lambda args: tallest(),
                                 changes=False)
@@ -141,8 +142,9 @@ Capability bases (each needs `get_name()`; look the rest up with `search_python_
 - **The host API** is `orca.host`, as for scripts (`references/python.md`): model, meshes, presets,
   `orca.host.ui` windows, dock panels, progress dialogs and notifications, `orca.host.plugin.storage()`
   (the plugin's folder). Never import another GUI toolkit (tkinter, Qt, wx).
-- **Tool calls from a plugin** (`orca.host.tools.call`) need no permission and come from `execute()` or a
-  thread it starts, never from a window callback or the UI thread; `export_replay` is refused to it.
+- **Tool calls from a plugin** (`orca.host.tools.call`) need no permission and come from `execute()`, an
+  operation's handler, or a thread started from one of those; from `on_load()` (or a thread it starts), a
+  window callback or the UI thread they raise `RuntimeError`. `export_replay` is refused to a plugin.
 - A wheel plugin (`.whl` as the folder's entry file) takes its name and version from the wheel's
   `METADATA` instead of the PEP 723 block, for plugins with several modules or files.
 
@@ -153,12 +155,16 @@ the guide and `search_python_api` differ, `search_python_api` describes the runn
 ## Install, run, change, debug
 
 1. Install it from a file anywhere:
-   `run_action {"id":"install_local_plugin","param":"<absolute path of the .py or .whl>"}` copies it to
-   `<datadir>/orca_plugins/<file name>/` (`orca_plugins/tallest_object.py/tallest_object.py`); later
+   `run_action {"id":"install_local_plugin","args":{"path":"<absolute path of the .py or .whl>"}}`
+   copies it to `<datadir>/orca_plugins/<file name>/` (`orca_plugins/tallest_object.py/tallest_object.py`); later
    edits go to that copy. The reply's message names the plugin, or the call fails saying why, such as a
    `.py` with no `name` in its `[tool.orcaslicer.plugin]` table. Replacing an installed plugin asks
    "Overwrite Plugin" first: the reply is `blocked_by_dialog`; `answer_dialog {"button":"Overwrite"}`,
-   then `wait {"for":"job","job":"<job>"}` for the result. [ref] Or write
+   then `wait {"for":"job","job":"<job>"}` for the result. [ref] On Windows, replacing a plugin that is
+   Activated can fail with "Failed to back up existing plugin <folder>: Access is denied" (the app is still
+   writing the folder's `.install_state.json` as it unloads the plugin); the plugin is then unloaded with
+   status Error. Untick it first, then reinstall; or, after the failure, run the same
+   `install_local_plugin` again: the plugin is no longer loaded, and it installs. [ref] Or write
    `<datadir>/orca_plugins/<key>/<key>.py` yourself and `run_action {"id":"refresh_plugins"}`. Either way
    `run_action {"id":"open_plugins"}` then lists it Inactive. [ref] With no file tools of your own, write
    the file from `run_script` (`os.makedirs`, `open(path, "w")`). [ref]
@@ -172,7 +178,8 @@ the guide and `search_python_api` differ, `search_python_api` describes the runn
    loaded with. Saved grants aren't asked again. [ref] Reinstalling instead leaves the plugin Inactive
    and asks every permission again.
    A wheel's load reuses the copy extracted when it first loaded, so install a new build of it with
-   `install_local_plugin` instead. Don't edit a Subscribed plugin's files: a cloud update replaces them.
+   `install_local_plugin` instead, unticking it first (the Windows note in step 1). Don't edit a
+   Subscribed plugin's files: a cloud update replaces them.
 5. **Debugging:**
    - Status Error after ticking: `get_log {"level":"error"}` has
      `[load_plugin_impl] FAIL plugin=<key> error=<the exception>`. [ref]
@@ -189,4 +196,4 @@ the guide and `search_python_api` differ, `search_python_api` describes the runn
 
 Browsing and subscribing to cloud plugins needs the person signed in to Orca Cloud, in the plugin
 browser. `install_local_plugin` without a path, and the Plugins dialog's own Install local plugin, open a
-file picker: give the command the path instead.
+file picker: give the command its `path` instead.

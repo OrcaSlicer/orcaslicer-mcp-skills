@@ -4,7 +4,7 @@
 
 - Filament slots: `run_action {"id":"filament_add"}` (the message names the new
   slot; it copies the last slot's preset) → `select_preset {"type":"filament","name":"…","filament_slot":2}`.
-  Delete: `run_action {"id":"filament_delete","param":"2"}` (1-based; objects on it
+  Delete: `run_action {"id":"filament_delete","args":{"slot":2}}` (1-based; objects on it
   move). [ref]
   - A filament assigned to a slot does what a pick in the slot's sidebar selector does: the slot takes
     the preset's colour when the preset defines one, the flushing volumes are recalculated (while the

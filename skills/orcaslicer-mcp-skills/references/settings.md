@@ -48,20 +48,22 @@
   (`meta.offered` lists the printer's); one plate only: plate scope (`references/output.md`). [ref]
 - Print host: `set_settings {"scope":"printer","values":{"host_type":"octoprint","print_host":"192.168.1.50","printhost_apikey":"…"}}`
   → `save_preset {"type":"printer","name":"…"}`. "Octo/Klipper" = `octoprint`; Moonraker `moonraker`.
-- Import presets: `run_action {"id":"import_configs","param":"/abs/My PLA.json"}`
-  (`.json`, `.zip`, `.orca_filament`; `{"path":…,"on_conflict":"overwrite"}` replaces). The message
-  names what was imported. [ref]
+- Import presets: `run_action {"id":"import_configs","args":{"path":"/abs/My PLA.json"}}`
+  (`.json`, `.zip`, `.orca_filament`; `"on_conflict":"overwrite"` beside `path` replaces presets that
+  exist). The message names what was imported. [ref]
   - A `.orca_printer` / `.orca_bundle` imports its presets as `_local/<id>/<name>`, and its process
     and filament then don't show as compatible with its printer. Unzip it and import its
     `printer/*.json`, then `process/*.json`, then `filament/*.json`, one call each, and
     `select_preset` the printer, process and filament by name. [ref] The bundle's base printer must
     be installed.
-- Export presets: `run_action {"id":"export_config","param":"/abs/dir"}` opens the
+- Export presets: `run_action {"id":"export_config","args":{"path":"/abs/dir"}}` opens the
   dialog (replay, `"await":false`): `click {"target":{"label":"Filament presets(.zip)","within":"Export Preset Bundle"}}`
-  → `set_widget_value {"target":{"name":"<preset>","within":"Export Preset Bundle"},"value":true}` →
-  `answer_dialog {"button":"ok"}` → `answer_dialog {"dialog":{"title":"Info"},"button":"ok"}`.
+  → `set_widget_value {"target":{"name":"<row>","within":"Export Preset Bundle"},"value":true}` (a
+  checkbox is named as its row reads: for filament ZIPs the filament's name, `Bambu PLA Basic`) →
+  `answer_dialog {"button":"ok"}` (`"await":false` too: it opens the result message) →
+  `answer_dialog {"dialog":{"title":"Info"},"button":"ok"}`. [ref]
 - Preferences: read `get_settings {"scope":"preferences","keys":["export_statistics"]}`; change in the
-  dialog (replay): `run_action {"id":"open_preferences","param":"developer:export_statistics"}`
+  dialog (replay): `run_action {"id":"open_preferences","args":{"tab":"developer","key":"export_statistics"}}`
   (`"await":false`) → `set_widget_value {"target":{"name":"export_statistics","within":"Preferences"},"value":true}`
   → `answer_dialog {"dialog":{"title":"Preferences"},"button":"close"}`. Checkboxes and fields save;
   most drop-down lists don't.

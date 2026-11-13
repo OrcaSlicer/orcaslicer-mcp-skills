@@ -35,7 +35,7 @@ objects put together.
 
 - Load: `open_files {"paths":["/abs/a.stl"]}`; a `.3mf` opens as a project unless `"as":"geometry"`,
   which adds its objects without its settings, as
-  `run_action {"id":"import_file","param":"/abs/p.3mf"}` does. An import is one undo step and leaves
+  `run_action {"id":"import_file","args":{"path":"/abs/p.3mf"}}` does. An import is one undo step and leaves
   the project with unsaved changes.
   Handy models: `run_action {"id":"add_handy_stanford_bunny"}` (also `3dbenchy`,
   `voron_cube`, `cali_cat`, `orca_badge`, `autodesk_fdm_test`, `orca_tolerance_test`). [ref]
@@ -45,8 +45,8 @@ objects put together.
   and `{"match":"floating parts","button":"no"}` → `open_files` → `select_objects {"objects":[0]}` →
   `run_action {"id":"obj_split_objects"}` → `arrange {}`. [ref]
 - Shape at a size, nothing selected: `select_objects {"none":true}` →
-  `run_action {"id":"add_primitive_cube","param":"40 40 10"}` (cylinder, cone,
-  disc `"D H"`, sphere `"D"`, torus `"inner tube"`). [ref]
+  `run_action {"id":"add_primitive_cube","args":{"size":[40,40,10]}}` (cylinder, cone,
+  disc `[D,H]`, sphere `[D]`, torus `[inner,tube]`). [ref]
 - Scale, size, rotate, move (`transform` drops the object onto the bed and registers its plate):
   - `transform {"object":0,"scale":1.5}` is relative (×1.5); `"mode":"absolute"` sets it. [ref]
   - `transform {"object":0,"size":[80,null,null]}` = 80 mm long in proportion;
@@ -61,13 +61,13 @@ objects put together.
   `run_action {"id":"obj_mirror_x"}` → `arrange {}`; `list_objects` shows
   `mirrored`. [ref]
 - N copies spaced: `select_objects {"objects":[0]}` →
-  `run_action {"id":"obj_set_instances","param":"6"}` (total count) →
+  `run_action {"id":"obj_set_instances","args":{"count":6}}` (total count) →
   `arrange {"plates":0,"spacing":10,"rotate":false}`. [ref] Fill the plate:
   `arrange {"fill":0}`; the reply has `instances`. [ref]
 - Separate named copies (each with its own settings): add the model once per copy, or set
   instances then `select_objects {"objects":[0]}` →
   `run_action {"id":"obj_instances_to_objects"}`; then per object
-  `select_objects {"objects":[i]}` → `run_action {"id":"obj_rename","param":"infill-10"}`. [ref]
+  `select_objects {"objects":[i]}` → `run_action {"id":"obj_rename","args":{"name":"infill-10"}}`. [ref]
 - Plates: `run_action {"id":"plate_add"}` →
   `transform {"object":2,"plate":1}` (same spot on the other plate) → `list_plates {}`. [ref]
 - Arrange: `arrange {}` (every unlocked plate), `{"plates":1,"spacing":10,"rotate":false}` (one plate;
@@ -78,8 +78,8 @@ objects put together.
   - A locked or an empty plate given by index is refused; `arrange {}` leaves a locked plate out and
     names it in `skipped_plates`. [ref]
 - Print order by object: see the trap below; order with
-  `run_action {"id":"obj_order_by_name"}` (`_height`, `_size`, `_filament`; param
-  `"all"` for every plate); the reply's `order` and `descending` say what it did. [ref]
+  `run_action {"id":"obj_order_by_name"}` (`_height`, `_size`, `_filament`;
+  `"args":{"all":true}` for every plate); the reply's `order` and `descending` say what it did. [ref]
 - Assemble objects into one: `select_objects {"objects":[1,2]}` →
   `run_action {"id":"obj_assemble"}` (the new object goes last). [ref]
 - Split one object into parts: `run_action {"id":"obj_split_parts"}`.

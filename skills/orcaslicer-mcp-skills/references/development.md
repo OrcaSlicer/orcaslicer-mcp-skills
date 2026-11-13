@@ -25,8 +25,8 @@ seeded with a finished setup wizard and one printer, Bambu Lab X1 Carbon 0.4 by 
 waits until the app is ready and prints the session: `url`, `port`, `token`, `pid`, `datadir`; with
 `--print-config` also the `claude mcp add` line.
 
-- `--cad` turns the Design (CAD) tab on, which `call_cad_tool` needs. The app reads it only at startup,
-  so pass it on every launch, also with a reused datadir.
+- `--cad` turns the Design (CAD) tab on, which the Design commands need (`references/cad.md`). The app
+  reads it only at startup, so pass it on every launch, also with a reused datadir.
 - `--unrestricted-scripts` lets Python scripts (`run_script`) run unrestricted. Without it they run
   restricted (`references/python.md`). It puts `"mcp_python_unrestricted": "true"` in the `app` section of
   the datadir's `OrcaSlicer.conf` before the launch; no tool turns it on. A `.py` given to `--mcp-run`
@@ -46,7 +46,8 @@ Talk to the app in two ways:
 - **The harness**, from any shell: `tools/mcp/orca_mcp.py call <tool> '<json args>' --wait` (`--wait`
   follows a returned job). Shortcuts: `tools`, `widgets`, `screenshot /abs/out.png --target canvas`,
   `run-replay FILE --out DIR`. From Python: `sys.path.insert(0, "tools/mcp")`, `OrcaMcp(port, token)`,
-  `call()`, `await_job()`, `images()`, `call_cad_tool()`.
+  `call()`, `await_job()`, `images()`, `call_command()` (any command by name through `call_tool`,
+  its job followed to the end).
 - **Agent tools**, registered with
   `claude mcp add orcaslicer -- /abs/build/src/Release/orca-slicer --mcp-stdio --datadir DIR`
   (Codex: `codex mcp add orcaslicer -- …` with the same command). The
@@ -101,12 +102,12 @@ To load a plugin in a harness instance without its prompts, side-load it before 
 ```json
 {"installed_from": "local", "installed_version": "1.0.0", "plugin_name": "<name>", "enabled": true,
  "capabilities": [{"<capability name>": true}],
- "permissions": {"threading": true, "tools": true, "operations": ["<operation>"]}}
+ "permissions": {"threading": true}}
 ```
 
-`threading`, `tools` and `full_access` are booleans; `fs_read`, `fs_readwrite`, `network_http`,
-`network_socket`, `process`, `events` and `operations` are lists. A running instance loads one through
-the Plugins dialog instead (`references/plugins.md`). `tools/mcp/tests/plugins/` holds the fixture
+`threading` and `full_access` are booleans; `fs_read`, `fs_readwrite`, `network_http`,
+`network_socket`, `process` and `events` are lists. Tool calls and operations need no permission.
+A running instance loads one through the Plugins dialog instead (`references/plugins.md`). `tools/mcp/tests/plugins/` holds the fixture
 plugins the harness tests use: `mcp_tools_fixture` (tool calls from a plugin, an operation),
 `mcp_web_fixture` (every kind of page control, in a dialog, a window, a dock panel and a config page)
 and `mcp_tools_broken` (a load that fails).
@@ -166,20 +167,24 @@ states in the same words; on a freshly launched app), `test_set_view_preview.py`
 `test_set_view_camera.py`, `test_set_window.py`,
 `test_list_windows.py`, `test_webview_modal.py`, `test_action_replay_hidden.py`, and with `--cad`
 `test_cad_replay.py`, `test_cad_slow_build.py`, `test_cad_failed_job.py`, `test_cad_examples.py` (every
-CAD tool's examples) and the Design tab's GUI tests `test_cad_sketching.py`, `test_cad_click_edit.py`
+Design command's examples) and the Design tab's GUI tests `test_cad_sketching.py`, `test_cad_click_edit.py`
 and `test_cad_context_menu.py`.
 `test_web_ui.py` drives a fixture plugin's pages: `test_web_ui.py --install DIR`, launch with
 `--datadir DIR`, then run it. `test_plugin_tools.py` (a plugin's calls into the tools) launches its own
 instances, and `test_orca_mcp_attach.py` (how the harness attaches to a running app) needs none.
-Unit tests: `tests/slic3rutils/test_mcp_*.cpp` and `test_operations.cpp`
-(`ctest --test-dir ./tests/slic3rutils -C Release`), tags `[Mcp]`, `[Mcp][CAD]`, `[Operations]`.
+Unit tests: `tests/slic3rutils/test_mcp_*.cpp`, `test_command_catalog.cpp` and `test_operations.cpp`
+(`ctest --test-dir ./tests/slic3rutils -C Release`), tags `[Mcp]`, `[Mcp][CAD]`, `[CommandCatalog]`,
+`[Operations]`.
 
-A new feature MCP should reach: a Speed Dial command in `NativeCommands.cpp` (key, description,
-`Path` param that skips its dialog) is enough for most; a typed tool in the matching
-`McpTools*.cpp` when it needs structured arguments or results. What the command or tool does (its
-checks, its refusals and their wording, its undo snapshot) goes into an operation in
-`src/slic3r/GUI/Operations/` that both call (`docs/HLSD/mcp-server.md`, "Making a feature
-reachable" and "The operations layer").
+A new feature MCP should reach: a Speed Dial command in `NativeCommands.cpp` (key, title, group,
+function, a description, and an `input_schema` of the arguments that stand for its dialog: with
+none it asks, with them it runs without asking) is enough for most; a typed tool in the matching
+`McpTools*.cpp` when it needs structured arguments or results. Both are commands of one catalog,
+which `search_tools` and `call_tool` reach by key. What the command or tool does (its checks, its
+refusals and their wording, its undo snapshot) goes into an operation in
+`src/slic3r/GUI/Operations/` that both call. A new or changed command changes the command
+reference, `tests/data/command_catalog.json`, which a unit test compares with the catalog
+(`docs/HLSD/mcp-server.md`, "Making a feature reachable" and "The operations layer").
 
 ## Linux display notes
 

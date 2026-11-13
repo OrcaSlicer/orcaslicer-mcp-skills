@@ -20,8 +20,8 @@
   `"plates":N` for another); `"sliced_3mf"` with `"plates":N|"all"` and a `.gcode.3mf` path;
   `"3mf"` the model without slicing data; `"stl"` all objects in one file. [ref]
 - One STL per object, named: rename the objects (`select_objects {"objects":[i]}` →
-  `run_action {"id":"obj_rename","param":"bunny_keychain"}`), then
-  `run_action {"id":"export_stl_multi","param":"/abs/existing_dir"}` writes
+  `run_action {"id":"obj_rename","args":{"name":"bunny_keychain"}}`), then
+  `run_action {"id":"export_stl_multi","args":{"path":"/abs/existing_dir"}}` writes
   `<name>.stl` each. [ref]
 - Save + reopen: `save_project {"path":"/abs/p.3mf","overwrite":true}` →
   `open_files {"paths":["/abs/p.3mf"],"discard_changes":true}`. With modified presets the load asks
@@ -42,10 +42,14 @@
   `set_view {"tab":"preview","view_type":"volumetric_flow_rate","layer_z":10.2}`;
   `"legend":{"Sparse infill":false,"travel":true}` hides or shows rows (after `view_type`). [ref]
 - Record a video: `start_recording {"captions":true,"pointer":true,"encode":true,"save_path":"/abs/demo.mkv","overwrite":true}`
-  (`"target":"canvas"` for the 3D view only) → the calls to show → `stop_recording {}`: frames,
-  seconds, and with `encode` an `encode` job → `wait {"for":"job","job":"jN"}` returns the MP4's path
-  (H.265 with the system ffmpeg; `encode_recording {"codec":"h264"}` for another). Captions show each
-  call; `pointer` highlights the pointer and its clicks. [ref]
+  (`"target":"canvas"` for the 3D view only; it stops by itself after `max_seconds`, an hour by
+  default) → the calls to show → `stop_recording {"silent":true}`: frames, seconds, and with `encode`
+  an `encode` job → `wait {"for":"job","job":"jN"}` returns the MP4's path (H.265 with the system
+  ffmpeg; `encode_recording {"codec":"h264"}` for another). Captions show each call; `pointer`
+  highlights the pointer and its clicks. [ref]
+  - Without arguments both are the person's commands: `start_recording {}` opens the Start Recording
+    dialog, and `stop_recording {}` stops at once, shows the person a notification and replies with the
+    file's path only.
   - Answer each dialog as soon as it opens: `wait {"for":"dialog"}`, pause 2–3 s so a viewer can read
     it (`wait {"for":"no_dialog","timeout_s":3}` returns after 3 s while it stays open), then
     `answer_dialog`. [ref] Never `wait {"for":"idle"}` while a dialog may be open: idle needs no
@@ -66,7 +70,8 @@
 - `save_project` and `run_action save_project_as` refuse a path ending in `.gcode.3mf`
   (`sliced_file_name`): a project is saved without G-code, and that file is
   `export {"format":"sliced_3mf","path":"/abs/x.gcode.3mf"}`. [ref]
-- `set_view` with `layer`, `layer_range` or `layer_z`, and `run_action go_to_layer`, are refused with
+- `set_view` with `layer`, `layer_range` or `layer_z`, and
+  `run_action {"id":"go_to_layer","args":{"percent":50}}`, are refused with
   "The preview has no layers. Slice the plate first." (`no_layers`) until a slice has given the
   Preview layers. From then on the Preview keeps the last slice's layers, also after the objects are
   deleted or a new project is started, and the reply's `layers` (`[first, last, count]`) is of that
