@@ -25,12 +25,13 @@ seeded with a finished setup wizard and one printer, Bambu Lab X1 Carbon 0.4 by 
 waits until the app is ready and prints the session: `url`, `port`, `token`, `pid`, `datadir`; with
 `--print-config` also the `claude mcp add` line.
 
-- `--cad` turns the Design (CAD) tab on, which the Design commands need (`references/cad.md`). The app
-  reads it only at startup, so pass it on every launch, also with a reused datadir.
-- `--unrestricted-scripts` lets Python scripts (`run_script`) run unrestricted. Without it they run
-  restricted (`references/python.md`). It puts `"mcp_python_unrestricted": "true"` in the `app` section of
-  the datadir's `OrcaSlicer.conf` before the launch; no tool turns it on. A `.py` given to `--mcp-run`
-  runs as a Python script.
+- `--cad` starts the app with `--cad`, which turns the Design (CAD) tab on for that run; the Design
+  commands need it (`references/cad.md`). It never writes the datadir's settings, so pass it on every
+  launch, also with a reused datadir.
+- `--unrestricted-scripts` starts the app with `--unrestricted-scripts`, which lets Python scripts
+  (`run_script`) run unrestricted for that run. It never writes the datadir's settings either. Without
+  it the datadir's setting decides: off in a fresh one, so scripts run restricted
+  (`references/python.md`). No tool turns it on. A `.py` given to `--run` runs as a Python script.
 - `--datadir DIR` reuses a datadir: pass the first launch's on every relaunch, so presets stay the
   same. Never point it at your real OrcaSlicer profile.
 - `--port N` when 13619 is taken (your own OrcaSlicer with MCP on). Several instances at once: give
@@ -79,10 +80,10 @@ Talk to the app in two ways:
    `${replay_dir}/…` for files kept beside it.
 10. Fix, rebuild, `stop`, launch with the same `--datadir`, then
     `tools/mcp/orca_mcp.py run-replay /abs/work/repro.json --out /abs/work` (exit 0 = passes).
-    Without the harness: `orca-slicer --datadir DIR --mcp-run repro.json --mcp-run-out /abs/work`
+    Without the harness: `orca-slicer --datadir DIR --run repro.json --outputdir /abs/work`
     (on a launch's private display, export the variables in the session file's `display_env`); it
-    writes `result.json` and the screenshots and
-    exits 0 (passed), 1 (a step failed) or 2 (invalid replay).
+    writes `result.json` and the screenshots to the `--outputdir` folder and
+    exits 0 (passed), 1 (a step failed) or 2 (the replay is invalid or cannot be read).
 11. Compare `before.png` and `after.png` and each step's result.
 
 ## Replay format
@@ -90,7 +91,7 @@ Talk to the app in two ways:
 The replay format (steps, placeholders, `expect`, `await`/`save_as`, `optional`, the result) is in
 `references/replays.md`. A repro replay starts from a known scene (`open_files` with
 `discard_changes`), ends with the `expect`s that hold once the bug is fixed, and keeps its files beside
-it as `${replay_dir}/…`. A `.py` given to `run-replay`/`--mcp-run` runs as a Python file run
+it as `${replay_dir}/…`. A `.py` given to `--run` runs as a Python file run
 (`references/python.md`).
 
 ## Plugins in a test instance

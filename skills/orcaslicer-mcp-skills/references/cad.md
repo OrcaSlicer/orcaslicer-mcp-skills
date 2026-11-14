@@ -3,8 +3,9 @@
 The Design tab's commands are not in the tool list: every call is
 `call_tool {"tool":"<name>","args":{...}}`, which the recipes below write short, as `<name> {args}`,
 and its reply is `{"result":{…}}`. A replay step or a script's `orca.host.tools.call` names the
-command itself (`{"tool":"extrude","args":{…}}`). The CAD feature must be on (Preferences >
-Features, then a restart; `get_app_state.design_tab` says so, and `cad_note` how to turn it on).
+command itself (`{"tool":"extrude","args":{…}}`). The CAD feature must be on when OrcaSlicer starts
+(Preferences > Features, then a restart, or `--cad` on its command line; `get_app_state.design_tab` says
+so, and `cad_note` how to turn it on).
 Look up a command's arguments and examples with `search_tools {"tool":"extrude"}`, find one with
 `search_tools {"group":"Design","query":"sketch"}` (each match with its schema), and list every
 name with `search_tools {"group":"Design"}`.

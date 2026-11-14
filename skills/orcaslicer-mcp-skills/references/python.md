@@ -15,8 +15,9 @@ is a Design tab job (`references/cad.md`); a command the user wants to keep in t
   resources folder, the standard library and, in a file run, the file's folder, and can't start a thread
   or a program or use the network: such an access raises `PermissionError`, whose message names the
   setting. The tools it calls through `orca.host.tools` are not restricted, so export and file work goes
-  through them. Only the person can lift the restriction, in Preferences > AI features > Python scripts,
-  which lets scripts bypass the permission checks: when a script needs more, ask them.
+  through them. Only the person can lift the restriction, which lets scripts bypass the permission
+  checks: in Preferences > AI features > Python scripts, or for one run by starting OrcaSlicer with
+  `--unrestricted-scripts`. When a script needs more, ask them.
   (`python.available` false: this build has no Python.)
 - Look the API up: `search_python_api {"query":"mesh vertices"}` gives classes and members with their
   signature and documentation, best match first. Read the signature: `name` and `size` are properties

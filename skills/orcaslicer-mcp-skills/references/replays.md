@@ -26,7 +26,8 @@ run a replay too.
 - **Run it:** `run_replay {"path":"/abs/x.json"}` for a file, or `run_replay {"replay":{…}}` inline (the
   object, or its JSON text with comments as a file holds it). `"vars":{…}` overrides the replay's;
   `"out_dir":"/abs/dir"` sets where `result.json` and screenshots go (default `<name>.out` beside a
-  file, `<datadir>/mcp/out/replay-<time>` for an inline one).
+  file, `replay-<time>` in the session's output folder for an inline one: `<datadir>/automation/out`,
+  or the `--outputdir` folder of a `--run` launch).
 - **Placeholders:** `${replay_dir}`, `${out_dir}`, `${env:NAME}`, `${vars.NAME}`, `${jobs.NAME}`, in any
   string; a string that is just one placeholder becomes the value itself (`"${vars.walls}"` is the
   number 2). A `run_script` step's `code` is never substituted.
