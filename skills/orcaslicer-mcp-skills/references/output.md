@@ -45,7 +45,8 @@
   (`"target":"canvas"` for the 3D view only; it stops by itself after `max_seconds`, an hour by
   default) → the calls to show → `stop_recording {"silent":true}`: frames, seconds, and with `encode`
   an `encode` job → `wait {"for":"job","job":"jN"}` returns the MP4's path (H.265 with the system
-  ffmpeg; `encode_recording {"codec":"h264"}` for another). Captions show each call; `pointer`
+  ffmpeg; `"codec":"h264"` for H.264). Every encode, `encode_recording` too, deletes the `.mkv`
+  once the MP4 is written; `"keep_raw_video_file":true` keeps it, to encode it again. Captions show each call; `pointer`
   highlights the pointer and its clicks. [ref]
   - Without arguments both are the person's commands: `start_recording {}` opens the Start Recording
     dialog, and `stop_recording {}` stops at once, shows the person a notification and replies with the
