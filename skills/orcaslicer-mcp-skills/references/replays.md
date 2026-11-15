@@ -102,5 +102,5 @@ the run outlasts the reply budget: `wait` for it.
 
 File > Action Replay… (Speed Dial `open_action_replay`) is where a person opens a replay file, reads
 its steps and runs them; Python scripts have their own Run Script panel (Speed Dial
-`toggle_run_script`). Both are hidden from the GUI tools; agents use `run_replay` and `run_script`, and
+`toggle_run_script_panel`). Both are hidden from the GUI tools; agents use `run_replay` and `run_script`, and
 hand the person a file to open there when they want to run it themselves.

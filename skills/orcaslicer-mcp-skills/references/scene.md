@@ -63,7 +63,7 @@ objects put together.
 - N copies spaced: `select_objects {"objects":[0]}` →
   `run_action {"id":"obj_set_instances","args":{"count":6}}` (total count) →
   `arrange {"plates":0,"spacing":10,"rotate":false}`. [ref] Fill the plate:
-  `arrange {"fill":0}`; the reply has `instances`. [ref]
+  `arrange {"fill_object":0}`; the reply has `instances`. [ref]
 - Separate named copies (each with its own settings): add the model once per copy, or set
   instances then `select_objects {"objects":[0]}` →
   `run_action {"id":"obj_instances_to_objects"}`; then per object
