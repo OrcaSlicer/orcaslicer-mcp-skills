@@ -12,11 +12,11 @@ name with `search_tools {"group":"Design"}`; `search_tools`' own description lis
 
 ## Names
 
-- The names are Fusion 360's: `extrude`, `fillet`, `shell`, `split`, `align`, `sketch_finish`,
-  `feature_suppress`, `surface_patch`, `sketch_blend_curve`. No prefix is the 3D model; `sketch_` works in
-  the open sketch, `surface_` makes sheet bodies, `construct_` reference planes, axes and coordinate
-  systems, `feature_` one entry of the history, `body_` one body (`body_set`, `body_place`,
-  `body_describe`, `body_mass_properties`).
+- The names use the industry's terminology, as Fusion 360, Onshape and SolidWorks use it: `extrude`,
+  `fillet`, `shell`, `split`, `align`, `sketch_finish`, `feature_suppress`, `surface_patch`,
+  `sketch_blend_curve`. No prefix is the 3D model; `sketch_` works in the open sketch, `surface_` makes
+  sheet bodies, `construct_` reference planes, axes and coordinate systems, `feature_` one entry of the
+  history, `body_` one body (`body_set`, `body_place`, `body_describe`, `body_mass_properties`).
 - One argument picks the variant: `type` for what kind of thing a command makes (`sketch_draw`'s shape,
   `hole`'s seat, `pattern`'s layout, `align`'s joint, `thicken`'s face or surface), `operation` for what the
   result does to the bodies already there: `new_body`, `join`, `cut`, `intersect` (`extrude` also
