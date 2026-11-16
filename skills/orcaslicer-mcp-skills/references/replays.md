@@ -9,7 +9,7 @@ run a replay too.
 ## Format
 
 ```jsonc
-{ "orca_replay": 1, "name": "two walls, sliced",
+{ "orca_replay_version": "0.1.0", "name": "two walls, sliced",
   "vars": {"model": "${replay_dir}/part.3mf", "walls": 2},          // ${vars.model} below
   "steps": [
     {"tool": "auto_answer_dialogs", "args": {"rules": [{"match": "unsaved changes", "button": "no"}]}},
@@ -59,7 +59,7 @@ the run outlasts the reply budget: `wait` for it.
 - Many objects, one call: [ref]
 
   ```json
-  {"orca_replay": 1, "name": "cubes", "steps": [
+  {"orca_replay_version": "0.1.0", "name": "cubes", "steps": [
     {"tool": "new_project", "args": {"discard_changes": true}},
     {"tool": "run_action", "args": {"id": "add_primitive_cube", "args": {"size": [20, 20, 10]}}},
     {"tool": "select_objects", "args": {"none": true}},
@@ -70,7 +70,7 @@ the run outlasts the reply budget: `wait` for it.
   ```
 
 - From Python, where the steps are computed:
-  `orca.host.tools.run_replay({"orca_replay": 1, "name": "x", "steps": steps})` returns the same reply.
+  `orca.host.tools.run_replay({"orca_replay_version": "0.1.0", "name": "x", "steps": steps})` returns the same reply.
 - Keep what you did as a file: `export_replay {"path":"/abs/session.json"}` (`"clear":true` at the
   start drops exploration; `"overwrite":true` replaces a file). It holds the calls that changed
   something, plus `wait` and `screenshot`, in order, with refs replaced by locators and screenshot paths
