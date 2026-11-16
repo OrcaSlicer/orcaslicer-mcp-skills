@@ -43,7 +43,8 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
     description says what it does with no arguments, does what a person's pick does when called
     with none: one that asks opens its dialog (`blocked_by_dialog`), and a Design command with a
     menu row does what the row does, which can be to open a card, to decline, or to act at once on
-    the selection (a Delete row deletes it). Given its arguments, it runs without asking:
+    the selection (a Delete row deletes it), as it does when given only the arguments that choose one of
+    its rows (`references/cad.md`). Given its arguments, it runs without asking:
     `run_action {"id":"export_gcode"}` opens the file dialog,
     `run_action {"id":"export_gcode","args":{"path":"/abs/x.gcode"}}` writes the file.
     `"silent":true` alone runs one whose schema has `silent` and whose other arguments all have
@@ -67,7 +68,7 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
     Between the named directions: `set_view {"camera":"front","orbit":[30,20]}` (yaw, pitch in degrees),
     never a drag, which follows the user's mouse settings. Close in on a point of the scene:
     `set_view {"camera":"top","look_at":<point>,"zoom":2}`, the point in mm taken from the scene (an
-    instance's `offset` from `list_objects`; on the Design tab, `describe_scene`'s `modeling_origin`),
+    instance's `offset` from `list_objects`; on the Design tab, `describe_design`'s `modeling_origin`),
     `zoom` in screenshot pixels per mm.
   - `export {"format":"gcode"|"sliced_3mf"|"3mf"|"stl","path":"/abs/…","overwrite":true}`; another plate
     `"plates":N`.

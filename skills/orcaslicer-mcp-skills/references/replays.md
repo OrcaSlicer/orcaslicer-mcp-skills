@@ -93,10 +93,10 @@ the run outlasts the reply budget: `wait` for it.
   hands it a `path` or cancels it.
 - A step with no `args` is the person's form of a command that has one (SKILL.md): it may open the
   command's dialog or a Design card, start a sketch tool, decline, or act at once on the selection
-  (`{"tool":"delete_body"}` deletes the selected body with no prompt; `references/cad.md`, "Two
+  (`{"tool":"body_delete"}` deletes the selected body with no prompt; `references/cad.md`, "Two
   forms"). Give such a step its arguments, or `"silent": true` where the schema has `silent` and
-  nothing else is required (`delete_body` has no `silent` and refuses it); `export_replay` keeps
-  them, so a call that ran silently replays silently.
+  nothing else is required (`body_delete {"silent":true}` is refused: it needs `body`); `export_replay`
+  keeps them, so a call that ran silently replays silently.
 
 ## The person's Action Replay window
 
