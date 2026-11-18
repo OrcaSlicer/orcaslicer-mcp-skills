@@ -8,54 +8,57 @@ tab or post-processing step that stays in the app.
 
 ## Using installed plugins
 
-- **Find what a plugin offers:** `search_actions {"query":"<plugin or command name>"}` lists its script
+- **Find what a plugin offers:** `action_search {"query":"<plugin or command name>"}` lists its script
   commands (`kind: "plugin"`, id `plugin_script_action:<capability>:<plugin key>`) and pages
-  (`plugin_page_action:<capability>:<plugin key>`). `search_tools {"query":"<words>"}` also lists the
-  operations plugins offer agents, `plugin.<plugin key>.<name>` with their schema; `search_tools {}` lists
+  (`plugin_page_action:<capability>:<plugin key>`). `tool_search {"query":"<words>"}` also lists the
+  operations plugins offer agents, `plugin.<plugin key>.<name>` with their schema; `tool_search {}` lists
   every name. Neither kind is in the tool list. A script command or page takes no arguments:
-  `run_action` refuses `args` for one.
-- **Run a script command:** `run_action {"id":"<capability name>"}` (or the full id) →
+  `action_run` refuses `args` for one.
+- **Run a script command:** `action_run {"id":"<capability name>"}` (or the full id) →
   `{"message":"Script plugin started."}`. It runs on its own; its result arrives as a notification:
-  find its message in `get_app_state.notifications` (in no fixed order; an error one has `level: "error"`
+  find its message in `app_state.notifications` (in no fixed order; an error one has `level: "error"`
   and the traceback). [ref]
-- **Call an operation:** `call_tool {"tool":"plugin.<key>.<name>","args":{…}}` → the handler's JSON
+- **Call an operation:** `tool_call {"tool":"plugin.<key>.<name>","args":{…}}` → the handler's JSON
   reply. It runs with the plugin's permissions, as a job when it takes long. [ref]
-- **Open a page:** `run_action {"id":"plugin_page_action:<capability>:<key>"}` shows the plugin's tab.
-- **Drive its windows, dock panels and pages** like any web page: `list_widgets {"query":"…"}` lists their
-  elements; `click {"target":{"web":"Go","within":"<window title>"}}`,
-  `set_widget_value {"target":{"css":"#name","within":"<window title>"},"value":"…"}`; `run_javascript` runs
+- **Open a page:** `action_run {"id":"plugin_page_action:<capability>:<key>"}` shows the plugin's tab.
+- **Drive its windows, dock panels and pages** like any web page: `widget_list {"query":"…"}` lists their
+  elements; `widget_click {"target":{"web":"Go","within":"<window title>"}}`,
+  `widget_set_value {"target":{"css":"#name","within":"<window title>"},"value":"…"}`; `webview_run_javascript` runs
   JavaScript in one. Dock panels show only on the Prepare and Preview tabs.
 
-## The Plugins dialog
+## The plugins, as the Plugins window lists them
 
-`run_action {"id":"open_plugins"}` opens it, modeless, as the web dialog "Plugins". Its rows are the
-installed plugins with an Activate checkbox, version, source (Local, Subscribed, Mine) and status:
+`plugin_list {}` gives each plugin's `key` (which the other plugin commands take), name, version,
+`installed`, `enabled` (loaded), `source` (local, subscribed, mine or orphaned), its capabilities and
+`error`, and `status`:
 
 | Status | Means |
 |---|---|
 | Activated | loaded |
-| Inactive | installed, not loaded: tick it |
+| Inactive | installed, not loaded: turn it on |
 | Error | failed to load: see Debugging below |
 | RuntimeError | loaded, but one capability failed and is off |
 
-- Activate or deactivate one: `click {"target":{"css":"label.plugin-checkbox:has(input[data-plugin-key=\"<key>\"])","within":"Plugins"}}`;
-  the reply's `checked` and `page.added` (`"Activated …"`, `"Failed to activate …"`) say what happened. [ref]
-  `list_widgets` finds a row by its name, not its key, and may leave out rows scrolled away; the locator
-  needs neither.
-- `"Expand <name> capabilities"` shows a plugin's capabilities with their own checkboxes; the details
-  below have tabs Plugin Info, Description, Config (each capability's JSON configuration), Changelog,
-  Diagnostics (the load error) and Permissions.
-- `run_action {"id":"refresh_plugins"}` rescans the plugin folders (notification "Plugins refreshed."),
-  and an open Plugins dialog shows the result. A Local row's version is its file's as of the last
-  refresh or activation, and a Subscribed row's is the release installed from the cloud; the code that
-  runs is what the last activation loaded.
+- Turn one on or off: `plugin_enable {"plugin":"<key>","enabled":true}`, as its row's switch does; the
+  call waits for the load and replies with the plugin's row, and a load that fails is an error naming
+  how the plugin is left. `"capability":"<name>"` turns one capability on or off. [ref]
+- `plugin_reload {"plugin":"<key>"}` loads it again after its files changed, as its row's Reload does
+  (`"clear_cache":true` also removes a wheel's extracted cache). `plugin_uninstall {"plugin":"<key>"}`
+  removes it for good, without asking.
+- `plugin_refresh {}` rescans the plugin folders, as Refresh Plugins does, waits for its own rescan and
+  replies with the plugins as `plugin_list` gives them. A Local plugin's version is its file's as of
+  the last refresh or load, and a Subscribed one's is the release installed from the cloud; the code
+  that runs is what the last load loaded.
+- The person's Plugins window (`window_open {"window":"plugins"}`, the web dialog "Plugins") shows the
+  same rows; a row's details have tabs Plugin Info, Description, Config (each capability's JSON
+  configuration), Changelog, Diagnostics (the load error) and Permissions.
 
 ## Permission prompts
 
 A plugin asks before it reads or writes files outside OrcaSlicer's folders, connects to the network,
 or starts a program or a thread. The prompt is a modal dialog titled "Plugin permissions" or
 "Plugin permission request", whose `message` names what it asks
-(`get_app_state.dialogs`); `answer_dialog {"button":"yes"|"no"}` answers it on every platform. [ref]
+(`app_state.dialogs`); `dialog_answer {"button":"yes"|"no"}` answers it on every platform. [ref]
 
 - These answers protect the person's computer and are saved with the plugin (shown on its Permissions
   tab): ask the user before pressing Yes, unless it is your own plugin in a throwaway test data folder.
@@ -69,7 +72,7 @@ or starts a program or a thread. The prompt is a modal dialog titled "Plugin per
 A single-file plugin is `<datadir>/orca_plugins/<key>/<key>.py`, one entry file per folder. The file's
 name without `.py` is the plugin key in action ids and `plugin.<key>.<name>`; keep the folder named the
 same, in lower case with underscores. The data folder is the parent of the `mcp` folder in
-`get_app_state.mcp.discovery_file`. That is the person's real data folder unless OrcaSlicer was launched
+`app_state.mcp.discovery_file`. That is the person's real data folder unless OrcaSlicer was launched
 with `--datadir`: say what you are adding before writing there.
 
 ```python
@@ -115,11 +118,11 @@ class TallestObject(orca.base):
                                 changes=False)
 ```
 
-Capability bases (each needs `get_name()`; look the rest up with `search_python_api`):
+Capability bases (each needs `get_name()`; look the rest up with `script_search_api`):
 
 | Base | Entry | Runs |
 |---|---|---|
-| `orca.script.ScriptPluginCapabilityBase` | `execute(self)` → `ExecutionResult` | when the person runs it from the Plugins dialog or the Speed Dial (`run_action`), on a worker thread; it may be `async def` |
+| `orca.script.ScriptPluginCapabilityBase` | `execute(self)` → `ExecutionResult` | when the person runs it from the Plugins dialog or the Speed Dial (`action_run`), on a worker thread; it may be `async def` |
 | `orca.pages.PagesPluginCapabilityBase` | `get_ui(self)` → HTML; `on_message(self, data)`, `post_message(data)`, `get_icon(self)` | a main-window tab while the capability is on |
 | `orca.slicing.SlicingPipelineCapabilityBase` | `execute(self, ctx)` → `ExecutionResult` | at slicing steps (`ctx.step`, `orca.slicing.Step`), on the slicing thread; at `psGCodePostProcess` it edits the file at `ctx.gcode_path` in place (the preview doesn't show the edit) |
 | `orca.resource_texture.ResourceTexturePluginCapabilityBase` | `get_texture_dir(self)` | a texture pack; wheel (`.whl`) plugins only |
@@ -128,9 +131,9 @@ Capability bases (each needs `get_name()`; look the rest up with `search_python_
 - **Results:** `orca.ExecutionResult.success(message)`, `.skipped(message)`,
   `.failure(orca.PluginResult.RecoverableError, message)`; the message is what the person sees.
 - **Hooks on any capability:** `on_load()`, `on_unload()`, and `on_lifecycle_event(self, event, ctx)`
-  for project, slicing, object, plate, preset and printer events (`search_python_api {"query":"LifecycleEvent"}`
+  for project, slicing, object, plate, preset and printer events (`script_search_api {"query":"LifecycleEvent"}`
   lists them; slicing events come on a background thread). A change made through the tools raises
-  them as the GUI's does (`new_project` sends `NewProject`), so a handler can be tested with tool
+  them as the GUI's does (`project_new` sends `NewProject`), so a handler can be tested with tool
   calls. [ref]
 - **Configuration:** `get_default_config()` returns a dict; `json.loads(self.get_config())` reads the
   saved one, `self.save_config(json.dumps(cfg))` writes it; the person edits it on the Config tab.
@@ -144,44 +147,44 @@ Capability bases (each needs `get_name()`; look the rest up with `search_python_
   (the plugin's folder). Never import another GUI toolkit (tkinter, Qt, wx).
 - **Tool calls from a plugin** (`orca.host.tools.call`) need no permission and come from `execute()`, an
   operation's handler, or a thread started from one of those; from `on_load()` (or a thread it starts), a
-  window callback or the UI thread they raise `RuntimeError`. `export_replay` is refused to a plugin.
+  window callback or the UI thread they raise `RuntimeError`. `replay_export` is refused to a plugin.
 - A wheel plugin (`.whl` as the folder's entry file) takes its name and version from the wheel's
   `METADATA` instead of the PEP 723 block, for plugins with several modules or files.
 
 The plugin developer guide and API pages are in the OrcaSlicer wiki
 (https://github.com/OrcaSlicer/OrcaSlicer_WIKI/tree/main/developer_reference/plugin_development). Where
-the guide and `search_python_api` differ, `search_python_api` describes the running build.
+the guide and `script_search_api` differ, `script_search_api` describes the running build.
 
 ## Install, run, change, debug
 
 1. Install it from a file anywhere:
-   `run_action {"id":"install_local_plugin","args":{"path":"<absolute path of the .py or .whl>"}}`
+   `plugin_install_local {"path":"<absolute path of the .py or .whl>"}`
    copies it to `<datadir>/orca_plugins/<file name>/` (`orca_plugins/tallest_object.py/tallest_object.py`); later
    edits go to that copy. The reply's message names the plugin, or the call fails saying why, such as a
-   `.py` with no `name` in its `[tool.orcaslicer.plugin]` table. Replacing an installed plugin asks
-   "Overwrite Plugin" first: the reply is `blocked_by_dialog`; `answer_dialog {"button":"Overwrite"}`,
-   then `wait {"for":"job","job":"<job>"}` for the result. [ref] On Windows, replacing a plugin that is
-   Activated can fail with "Failed to back up existing plugin <folder>: Access is denied" (the app is still
-   writing the folder's `.install_state.json` as it unloads the plugin); the plugin is then unloaded with
-   status Error. Untick it first, then reinstall; or, after the failure, run the same
-   `install_local_plugin` again: the plugin is no longer loaded, and it installs. [ref] Or write
-   `<datadir>/orca_plugins/<key>/<key>.py` yourself and `run_action {"id":"refresh_plugins"}`. Either way
-   `run_action {"id":"open_plugins"}` then lists it Inactive. [ref] With no file tools of your own, write
-   the file from `run_script` (`os.makedirs`, `open(path, "w")`). [ref]
-2. Tick its checkbox (above). Answer the prompt its `request_permissions` call opens
-   (`get_app_state.dialogs`; the tick's reply lists it). [ref]
-3. Run it: `run_action {"id":"Report tallest"}` → read `get_app_state.notifications`;
-   `call_tool {"tool":"plugin.tallest_object.tallest","args":{}}`; for a slicing step, slice and export.
+   `.py` with no `name` in its `[tool.orcaslicer.plugin]` table. Replacing an installed plugin needs
+   `"overwrite":true`; without it the call is refused with the question the dialog asks. [ref] On
+   Windows, replacing a plugin that is Activated can fail with "Failed to back up existing plugin
+   <folder>: Access is denied" (the app is still writing the folder's `.install_state.json` as it
+   unloads the plugin); the plugin is then unloaded with status Error. Turn it off first
+   (`plugin_enable` with `"enabled":false`), then reinstall; or, after the failure, run the same
+   `plugin_install_local` again: the plugin is no longer loaded, and it installs. Or write
+   `<datadir>/orca_plugins/<key>/<key>.py` yourself and `plugin_refresh {}`. Either way
+   `plugin_list` then lists it Inactive. [ref] With no file tools of your own, write
+   the file from `script_run` (`os.makedirs`, `open(path, "w")`). [ref]
+2. Turn it on: `plugin_enable {"plugin":"tallest_object","enabled":true}`. Answer the prompt its
+   `request_permissions` call opens (`blocked_by_dialog`; `app_state.dialogs` lists it). [ref]
+3. Run it: `action_run {"id":"Report tallest"}` → read `app_state.notifications`;
+   `tool_call {"tool":"plugin.tallest_object.tallest","args":{}}`; for a slicing step, slice and export.
    Notifications have no id or time, so a second run with the same message looks like the first:
    check a change through an operation, or put something that changes in the message.
-4. **After an edit**, untick and tick it again in the Plugins dialog: a loaded plugin keeps the code it
-   loaded with. Saved grants aren't asked again. [ref] Reinstalling instead leaves the plugin Inactive
-   and asks every permission again.
-   A wheel's load reuses the copy extracted when it first loaded, so install a new build of it with
-   `install_local_plugin` instead, unticking it first (the Windows note in step 1). Don't edit a
-   Subscribed plugin's files: a cloud update replaces them.
+4. **After an edit**, `plugin_reload {"plugin":"<key>"}`: a loaded plugin keeps the code it loaded
+   with. Saved grants aren't asked again. [ref] Reinstalling instead leaves the plugin Inactive and asks
+   every permission again.
+   A wheel's load reuses the copy extracted when it first loaded, so reload it with
+   `"clear_cache":true`, or install a new build of it with `plugin_install_local`, turning it off first
+   (the Windows note in step 1). Don't edit a Subscribed plugin's files: a cloud update replaces them.
 5. **Debugging:**
-   - Status Error after ticking: `get_log {"level":"error"}` has
+   - Status Error after turning it on: `app_log {"level":"error"}` has
      `[load_plugin_impl] FAIL plugin=<key> error=<the exception>`. [ref]
    - The traceback, and everything the plugin prints to `sys.stderr`, is in
      `<datadir>/log/python_*.log` (the newest file). [ref]
@@ -195,5 +198,5 @@ the guide and `search_python_api` differ, `search_python_api` describes the runn
 ## Not possible
 
 Browsing and subscribing to cloud plugins needs the person signed in to Orca Cloud, in the plugin
-browser. `install_local_plugin` without a path, and the Plugins dialog's own Install local plugin, open a
+browser. `plugin_install_local {}`, and the Plugins dialog's own Install local plugin, open a
 file picker: give the command its `path` instead.

@@ -1,11 +1,12 @@
 # Scene: objects, parts of the scene, plates
 
-Typed tools first: `open_files`, `transform`, `arrange`, `list_objects`, `list_plates`, and the
-object commands of `references/actions.md`, which act on what `select_objects` picked.
+Commands: `project_import`, `object_transform`, `object_arrange`, `object_list`, `plate_list`, and
+the other `object_` and `plate_` commands, which act on the objects or plate they name, else on what
+`object_select` picked or the current plate.
 
 ## How the scene is laid out
 
-`list_objects` is the Objects panel as a tree:
+`object_list` is the Objects panel as a tree:
 
 - `plates[i]` is `{index, name, objects}`; `outside` holds the objects on no plate. `{"plate":1}` lists
   that plate alone.
@@ -15,90 +16,88 @@ object commands of `references/actions.md`, which act on what `select_objects` p
   modifiers, support blockers and enforcers and precise seams, told apart by `type`.
 - `index` numbers an object in the project and a part in its object, whatever the plate. Those, and
   the `id` beside each, are what the other tools take: `"object":2`, `"part":1`, `"parts":[[2,1]]`.
-- `list_plates` has each plate's settings and how many objects are on it (`objects`).
+- `plate_list` has each plate's settings and how many objects are on it (`objects`).
 
 **Assembly.** When the person says "assembly" they mean one object with several parts: what Assemble
-makes from several objects (`obj_assemble`, named Assembly), what a STEP assembly opens as, and what
-the Design tab commits for several bodies. `list_objects` has no separate kind for it: it is an object
+makes from several objects (`object_assemble`, named Assembly), what a STEP assembly opens as, and what
+the Design tab commits for several bodies. `object_list` has no separate kind for it: it is an object
 whose `parts` has more than one entry of `type` `part`. Work with it this way:
 
-- The whole assembly: `transform {"object":N,…}`, `select_objects {"objects":[N]}`, the object scope of
-  `set_settings`.
-- One piece of it: `transform {"object":N,"part":M,…}`, `select_objects {"parts":[[N,M]]}`,
-  `set_settings {"scope":"part","object":N,"part":M,…}` for its own filament and settings.
-- Take it apart: `select_objects {"objects":[N]}` → `run_action {"id":"obj_split_objects"}`.
+- The whole assembly: `object_transform {"object":N,…}`, `object_select {"objects":[N]}`, the target
+  `object` of `settings_set`.
+- One piece of it: `object_transform {"object":N,"part":M,…}`, `object_select {"parts":[[N,M]]}`,
+  `settings_set {"target":"part","object":N,"part":M,…}` for its own filament and settings.
+- Take it apart: `object_split {"object":N,"into":"objects"}`.
 
-The assemble view (`set_view {"canvas":"assemble"}`) is something else: a 3D view that shows the
+The assemble view (`view_set {"canvas":"assemble"}`) is something else: a 3D view that shows the
 objects put together.
 
 ## Recipes
 
-- Load: `open_files {"paths":["/abs/a.stl"]}`; a `.3mf` opens as a project unless `"as":"geometry"`,
-  which adds its objects without its settings, as
-  `run_action {"id":"import_file","args":{"path":"/abs/p.3mf"}}` does. An import is one undo step and leaves
-  the project with unsaved changes.
-  Handy models: `run_action {"id":"add_handy_stanford_bunny"}` (also `3dbenchy`,
+- Load: `project_import {"paths":["/abs/a.stl"]}`; a `.3mf` given to it adds its objects without its
+  settings, and `project_open {"path":"/abs/p.3mf"}` opens it as a project. An import is one undo step
+  and leaves the project with unsaved changes.
+  Handy models: `object_add_handy_model {"model":"stanford_bunny"}` (also `3dbenchy`,
   `voron_cube`, `cali_cat`, `orca_badge`, `autodesk_fdm_test`, `orca_tolerance_test`). [ref]
-- Inch or metre model: `auto_answer_dialogs {"rules":[{"match":"too small","button":"yes"}]}` →
-  `open_files` (Yes converts to mm). [ref]
+- Inch or metre model: `dialog_auto_answer {"rules":[{"match":"too small","button":"yes"}]}` →
+  `project_import` (Yes converts to mm). [ref]
 - STEP assembly → separate objects: auto-answer `{"match":"Step file import parameters","button":"ok"}`
-  and `{"match":"floating parts","button":"no"}` → `open_files` → `select_objects {"objects":[0]}` →
-  `run_action {"id":"obj_split_objects"}` → `arrange {}`. [ref]
-- Shape at a size, nothing selected: `select_objects {"none":true}` →
-  `run_action {"id":"add_primitive_cube","args":{"size":[40,40,10]}}` (cylinder, cone,
-  disc `[D,H]`, sphere `[D]`, torus `[inner,tube]`). [ref]
-- Scale, size, rotate, move (`transform` drops the object onto the bed and registers its plate):
-  - `transform {"object":0,"scale":1.5}` is relative (×1.5); `"mode":"absolute"` sets it. [ref]
-  - `transform {"object":0,"size":[80,null,null]}` = 80 mm long in proportion;
+  and `{"match":"floating parts","button":"no"}` → `project_import` →
+  `object_split {"object":0,"into":"objects"}` → `object_arrange {}`. [ref]
+- Shape at a size: `object_add_primitive {"shape":"cube","size":[40,40,10]}` (cylinder, cone,
+  disc `[D,H]`, sphere `[D]`, torus `[inner,tube]`; `"position"`, `"plate"`, `"name"` too). [ref]
+- Scale, size, rotate, move (`object_transform` drops the object onto the bed and registers its plate):
+  - `object_transform {"object":0,"scale":1.5}` is relative (×1.5); `"mode":"absolute"` sets it. [ref]
+  - `object_transform {"object":0,"size":[80,null,null]}` = 80 mm long in proportion;
     `"size":[30,20,10]` per axis. [ref]
-  - Upright + centred: `transform {"object":0,"rotate":[90,0,0]}` (relative), then
-    `transform {"object":0,"translate":[128,128,0],"mode":"absolute"}` (X1C bed centre). [ref]
-  - Diagonal fit on a square bed: `transform {"object":0,"rotate":[0,0,-45]}` (X1C: −45°, not +45°,
-    which hits the front-left exclusion area). [ref]
-  - Smaller printer: `select_preset` printer (it re-picks process and filament silently) →
-    `select_objects {"objects":[0]}` → `run_action {"id":"obj_fit_volume"}`. [ref]
-- Mirrored pair: `open_files` the file twice → `transform` `size` each → `select_objects {"objects":[1]}` →
-  `run_action {"id":"obj_mirror_x"}` → `arrange {}`; `list_objects` shows
+  - Upright + centred: `object_transform {"object":0,"rotate":[90,0,0]}` (relative), then
+    `object_transform {"object":0,"translate":[128,128,0],"mode":"absolute"}` (X1C bed centre). [ref]
+  - Diagonal fit on a square bed: `object_transform {"object":0,"rotate":[0,0,-45]}` (X1C: −45°, not
+    +45°, which hits the front-left exclusion area). [ref]
+  - Smaller printer: `preset_select` printer (it re-picks process and filament silently) →
+    `object_scale_to_fit {"objects":[0]}`. [ref]
+- Mirrored pair: `project_import` the file twice → `object_transform` `size` each →
+  `object_mirror {"objects":[1],"axis":"x"}` → `object_arrange {}`; `object_list` shows
   `mirrored`. [ref]
-- N copies spaced: `select_objects {"objects":[0]}` →
-  `run_action {"id":"obj_set_instances","args":{"count":6}}` (total count) →
-  `arrange {"plates":0,"spacing":10,"rotate":false}`. [ref] Fill the plate:
-  `arrange {"fill_object":0}`; the reply has `instances`. [ref]
+- N copies spaced: `object_set_instances {"object":0,"count":6}` (total count) →
+  `object_arrange {"plates":0,"spacing":10,"rotate":false}`. [ref] Fill the plate:
+  `object_arrange {"fill_object":0}`; the reply's `added` counts the new instances. [ref]
 - Separate named copies (each with its own settings): add the model once per copy, or set
-  instances then `select_objects {"objects":[0]}` →
-  `run_action {"id":"obj_instances_to_objects"}`; then per object
-  `select_objects {"objects":[i]}` → `run_action {"id":"obj_rename","args":{"name":"infill-10"}}`. [ref]
-- Plates: `run_action {"id":"plate_add"}` →
-  `transform {"object":2,"plate":1}` (same spot on the other plate) → `list_plates {}`. [ref]
-- Arrange: `arrange {}` (every unlocked plate), `{"plates":1,"spacing":10,"rotate":false}` (one plate;
-  the options stay saved as in the panel). It waits for the job and may renumber objects. [ref]
+  instances then `object_separate_instances {"object":0}`; then per object
+  `object_rename {"object":i,"name":"infill-10"}`. [ref]
+- Plates: `plate_add {}` → `object_transform {"object":2,"plate":1}` (same spot on the other plate) →
+  `plate_list {}`. [ref]
+- Arrange: `object_arrange {}` (every unlocked plate), `{"plates":1,"spacing":10,"rotate":false}` (one
+  plate; the options stay saved as in the panel). It waits for the job and may renumber objects. [ref]
   - It shows the Prepare view first, so it runs from the assemble view, and with a gizmo open, which
-    stays open, as `run_action {"id":"obj_arrange"}` does. `fill` selects its object, so it is refused
-    in the assemble view and while a gizmo is open. [ref]
-  - A locked or an empty plate given by index is refused; `arrange {}` leaves a locked plate out and
-    names it in `skipped_plates`. [ref]
-- Print order by object: see the trap below; order with
-  `run_action {"id":"obj_order_by_name"}` (`_height`, `_size`, `_filament`;
-  `"args":{"all":true}` for every plate); the reply's `order` and `descending` say what it did. [ref]
-- Assemble objects into one: `select_objects {"objects":[1,2]}` →
-  `run_action {"id":"obj_assemble"}` (the new object goes last). [ref]
-- Split one object into parts: `run_action {"id":"obj_split_parts"}`.
+    stays open. `fill_object` selects its object, so it is refused in the assemble view and while a
+    gizmo is open. [ref]
+  - A locked or an empty plate given by index is refused; `object_arrange {}` leaves a locked plate
+    out and names it in `skipped_plates`. [ref]
+- Print order by object: see the trap below; order with `object_order {"by":"name"}` (`height`,
+  `size`, `filament`; `"descending":true`; `"all":true` for every plate; `"order":[2,0,1]` puts a
+  plate's objects in the order given). `by` alone, as its tile, reverses an order the objects already
+  have; the reply's `order` and `descending` say what it did. [ref]
+- Assemble objects into one: `object_assemble {"objects":[1,2]}` (the new object goes last). [ref]
+- Split one object into parts: `object_split {"object":0,"into":"parts"}`.
 
 ## Traps
 
 - By-object printing needs `extruder_clearance_radius` (68 mm on the X1C) between objects. With
-  `print_sequence` `"by object"` set in the process, `arrange {}` with automatic spacing still left
-  them "too close to others" at the slice; `arrange {"spacing":70}` fixed it. A plate whose own
-  `print_sequence` (plate scope) differs from the process is always arranged with automatic
-  spacing (the reply's `note` says so): place its objects ≥ the radius apart with absolute
-  `transform`s, plate 1's origin being 307.2 mm right of plate 0's on the X1C (read an offset from
-  `list_objects`). [ref]
-- `list_objects` rotation is folded Euler (−45° about Z reads `[180,-180,135]`); `bbox` is
+  `print_sequence` `"by object"` set in the process, `object_arrange {}` with automatic spacing still
+  left them "too close to others" at the slice; `object_arrange {"spacing":70}` fixed it. A plate whose
+  own `print_sequence` (`plate_set_settings`) differs from the process is always arranged with
+  automatic spacing (the reply's `note` says so): place its objects ≥ the radius apart with absolute
+  `object_transform`s, plate 1's origin being 307.2 mm right of plate 0's on the X1C (read an offset
+  from `object_list`). [ref]
+- `object_list` rotation is folded Euler (−45° about Z reads `[180,-180,135]`); `bbox` is
   instance 0's; `mirrored` says left-handed, not which axis.
 - `spot` targets aim along a ray through the bbox centre: a hole or gap there has no `spot`.
+- Splitting into objects asks Split's question when pieces would float above the bed: give
+  `"keep_z":true` (keep their height) or `false` (let them drop), or the call is refused
+  (`auto_drop_question`).
 
 ## Not possible
 
-Lay on face as a typed call (Place on Face gizmo or a computed `transform rotate`); orient with a
-result (`obj_orient` replies only success); several files as one object (`open_files`, then
-`obj_assemble`).
+Lay on face as a typed call (Place on Face gizmo or a computed `object_transform` `rotate`); several
+files as one object (`project_import`, then `object_assemble`).

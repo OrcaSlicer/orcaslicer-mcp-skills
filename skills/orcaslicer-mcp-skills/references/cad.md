@@ -1,14 +1,14 @@
 # Design (CAD) tab
 
 The Design tab's commands are not in the tool list: every call is
-`call_tool {"tool":"<name>","args":{...}}`, which the recipes below write short, as `<name> {args}`,
+`tool_call {"tool":"<name>","args":{...}}`, which the recipes below write short, as `<name> {args}`,
 and its reply is `{"result":{…}}`. A replay step or a script's `orca.host.tools.call` names the
 command itself (`{"tool":"extrude","args":{…}}`). The CAD feature must be on when OrcaSlicer starts
-(Preferences > Features, then a restart, or `--cad` on its command line; `get_app_state.design_tab` says
+(Preferences > Features, then a restart, or `--cad` on its command line; `app_state.design_tab` says
 so, and `cad_note` how to turn it on).
-Look up a command's arguments and examples with `search_tools {"tool":"extrude"}`, find one with
-`search_tools {"group":"Design","query":"sketch"}` (each match with its schema), and list every
-name with `search_tools {"group":"Design"}`; `search_tools`' own description lists them by heading.
+Look up a command's arguments and examples with `tool_search {"tool":"extrude"}`, find one with
+`tool_search {"group":"Design","query":"sketch"}` (each match with its schema), and list every
+name with `tool_search {"group":"Design"}`; `tool_search`' own description lists them by heading.
 
 ## Names
 
@@ -21,7 +21,10 @@ name with `search_tools {"group":"Design"}`; `search_tools`' own description lis
   `hole`'s seat, `pattern`'s layout, `align`'s joint, `thicken`'s face or surface), `operation` for what the
   result does to the bodies already there: `new_body`, `join`, `cut`, `intersect` (`extrude` also
   `auto`, the body the profile touches). A command reads a guessed `type` as its `operation` and the
-  other way round. An argument a command does not take is refused, never ignored. [ref]
+  other way round. [ref] An argument a command does not take is refused where its schema closes its
+  list of arguments (`extrude`, `fillet`, `hole`, `rename_selected`); many others (`helix`, `shell`,
+  `body_transform`, `construct_plane`, the reads `describe_design`, `body_describe`) ignore it, so
+  check each name against `tool_search {"tool":…}` before relying on it.
 
 ## Two forms
 
@@ -44,9 +47,9 @@ name with `search_tools {"group":"Design"}`; `search_tools`' own description lis
     typed in it `confirm_tool {}` takes its OK, which opens the text's placement (`"open":"insert"`), while
     a row whose dialog is modal (`body_set {}`, the Color row, with a body selected, and
     `sketch_insert_svg {}`) holds the call, which replies `blocked_by_dialog` with a job first, as any
-    command that asks does; the SVG file picker is native, so register an `auto_answer_dialogs` rule
+    command that asks does; the SVG file picker is native, so register a `dialog_auto_answer` rule
     before calling it (SKILL.md, Dialogs). [ref] `body_set {}` opens the system's colour picker, which
-    `answer_dialog` does not close on Windows: colour a body with `body_set {"body":…,"color":"#rrggbb"}`
+    `dialog_answer` does not close on Windows: colour a body with `body_set {"body":…,"color":"#rrggbb"}`
     instead.
   - Declined: on an empty design `extrude {}` builds nothing, with `"busy":null` and
     `"status":"✗ Create a sketch, or pick a solid face, first"`. [ref]
@@ -73,7 +76,7 @@ name with `search_tools {"group":"Design"}`; `search_tools`' own description lis
   is open ("Design tab busy: a sketch is open in the Design tab" for
   `fillet {"edges":[0],"radius":1,"body":0}` in a sketch); the sketch commands work on the open
   sketch. [ref]
-- `search_tools {"tool":…}` shows which form a command has: `silent` in its schema for both; no
+- `tool_search {"tool":…}` shows which form a command has: `silent` in its schema for both; no
   arguments at all for one that only does what its row does (`rename_selected`, `zoom_to_selection`);
   neither for one with a silent form only, which runs whatever it is given (`describe_design`,
   `body_describe`, `commit_to_plate`), or opens a row's tool only with that row's `type`
@@ -168,7 +171,7 @@ name with `search_tools {"group":"Design"}`; `search_tools`' own description lis
   (`min_distance`), `body_describe` radii.
 - Commit to the plate: `commit_to_plate {}` (one object; `"mode":"bodies"` one per body;
   `"replace":[i]` deletes those Prepare objects in the same undo step, e.g. the stale object of an
-  earlier commit) → `list_objects`. `export_step {"path":"/abs/x.step","overwrite":true}`. [ref]
+  earlier commit) → `object_list`. `export_step {"path":"/abs/x.step","overwrite":true}`. [ref]
 - Move or turn a body as a feature: `body_transform {"body":0,"dx":30}` (`dy`, `dz`; `angle` about
   `axis_x/y/z` through `pivot_x/y/z`; `"copy":true` adds the moved copy as a new body). Place it for the
   plate only, outside the history: `body_place {"body":0,"move":[30,0,0]}` (`rotate`, `face` to lay on
@@ -195,13 +198,13 @@ name with `search_tools {"group":"Design"}`; `search_tools`' own description lis
   silent form: it may open a card, decline, or act on the selection at once, and a Delete row deletes
   with no prompt (Two forms above). To build, pass the arguments, or `{"silent":true}` where
   nothing else is required.
-- `run_action` reaches a Design tile only while the Design tab is shown in the tile's mode;
-  `call_tool` reaches every Design command from any tab, the tab need not be shown. A tile of a row
+- `action_run` reaches a Design tile only while the Design tab is shown in the tile's mode;
+  `tool_call` reaches every Design command from any tab, the tab need not be shown. A tile of a row
   folded into a command (Polar array, `sk_array_polar`) runs that command with the row's arguments.
 - Face and edge ids from `body_describe` expire when the model rebuilds; deleting, moving or
   suppressing features renumbers features and bodies.
-- Design-only edits mark the project modified (`get_app_state.project.dirty`), so `new_project`
-  and `open_files` after them need `"discard_changes":true`. [ref]
+- Design-only edits mark the project modified (`app_state.project.dirty`), so `project_new`
+  and `project_open` after them need `"discard_changes":true`. [ref]
 - Commit appends: without `replace`, the earlier committed object stays on the plate.
 
 ## Not possible

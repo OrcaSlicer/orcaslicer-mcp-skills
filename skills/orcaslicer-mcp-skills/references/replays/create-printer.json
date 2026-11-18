@@ -1,9 +1,9 @@
 {
- "orca_replay_version": "0.1.0",
+ "orca_replay_version": "0.2.0",
  "name": "create printer",
  "steps": [
   {
-   "tool": "set_widget_value",
+   "tool": "widget_set_value",
    "args": {
     "target": {
      "class": "PlaterPresetComboBox",
@@ -15,14 +15,14 @@
    "save_as": "c"
   },
   {
-   "tool": "wait",
+   "tool": "app_wait",
    "args": {
     "for": "dialog",
     "timeout_s": 10
    }
   },
   {
-   "tool": "click",
+   "tool": "widget_click",
    "args": {
     "target": {
      "class": "CheckBox",
@@ -32,7 +32,7 @@
    }
   },
   {
-   "tool": "set_widget_value",
+   "tool": "widget_set_value",
    "args": {
     "target": {
      "label": "Printer",
@@ -45,7 +45,7 @@
    }
   },
   {
-   "tool": "set_widget_value",
+   "tool": "widget_set_value",
    "args": {
     "target": {
      "label": "Printer",
@@ -58,7 +58,7 @@
    }
   },
   {
-   "tool": "set_widget_value",
+   "tool": "widget_set_value",
    "args": {
     "target": {
      "label": "Nozzle Diameter",
@@ -69,7 +69,7 @@
    }
   },
   {
-   "tool": "set_widget_value",
+   "tool": "widget_set_value",
    "args": {
     "target": {
      "label": "Printable Space",
@@ -81,7 +81,7 @@
    }
   },
   {
-   "tool": "set_widget_value",
+   "tool": "widget_set_value",
    "args": {
     "target": {
      "label": "Printable Space",
@@ -93,7 +93,7 @@
    }
   },
   {
-   "tool": "set_widget_value",
+   "tool": "widget_set_value",
    "args": {
     "target": {
      "label": "Origin",
@@ -105,7 +105,7 @@
    }
   },
   {
-   "tool": "set_widget_value",
+   "tool": "widget_set_value",
    "args": {
     "target": {
      "label": "Origin",
@@ -117,7 +117,7 @@
    }
   },
   {
-   "tool": "set_widget_value",
+   "tool": "widget_set_value",
    "args": {
     "target": {
      "label": "Max Print Height",
@@ -128,13 +128,13 @@
    }
   },
   {
-   "tool": "answer_dialog",
+   "tool": "dialog_answer",
    "args": {
     "button": "ok"
    }
   },
   {
-   "tool": "set_widget_value",
+   "tool": "widget_set_value",
    "args": {
     "target": {
      "label": "Select Vendor",
@@ -144,7 +144,7 @@
    }
   },
   {
-   "tool": "set_widget_value",
+   "tool": "widget_set_value",
    "args": {
     "target": {
      "class": "ComboBox",
@@ -155,7 +155,7 @@
    }
   },
   {
-   "tool": "click",
+   "tool": "widget_click",
    "args": {
     "target": {
      "label": "Create Based on Current Printer",
@@ -166,7 +166,7 @@
    }
   },
   {
-   "tool": "click",
+   "tool": "widget_click",
    "args": {
     "target": {
      "class": "CheckBox",
@@ -181,7 +181,7 @@
    }
   },
   {
-   "tool": "click",
+   "tool": "widget_click",
    "args": {
     "target": {
      "class": "CheckBox",
@@ -196,7 +196,7 @@
    }
   },
   {
-   "tool": "click",
+   "tool": "widget_click",
    "args": {
     "target": {
      "class": "CheckBox",
@@ -211,7 +211,7 @@
    }
   },
   {
-   "tool": "click",
+   "tool": "widget_click",
    "args": {
     "target": {
      "label": "Create",
@@ -221,20 +221,20 @@
    }
   },
   {
-   "tool": "wait",
+   "tool": "app_wait",
    "args": {
     "for": "dialog",
     "timeout_s": 10
    }
   },
   {
-   "tool": "answer_dialog",
+   "tool": "dialog_answer",
    "args": {
     "button": "Printer Setting"
    }
   },
   {
-   "tool": "wait",
+   "tool": "app_wait",
    "args": {
     "for": "job",
     "job": "${jobs.c}"

@@ -2,17 +2,19 @@
 
 ## Make a test
 
-`generate_calibration_test` builds the Calibration menu's test without its dialog: a new project with the test
+`calibration_generate_test` builds the Calibration menu's test without its dialog: a new project with the test
 model, the presets changed as the test needs, printed with filament slot 1. Select the printer,
 process and filament first, then:
 
-`generate_calibration_test {"test":"pressure_advance","start":0,"end":0.06,"step":0.002,"discard_changes":true,"preset_changes":"discard"}`
-→ `slice {}` → `export {"format":"gcode","path":"/abs/pa.gcode","overwrite":true}`. [ref]
+`calibration_generate_test {"test":"pressure_advance","start":0,"end":0.06,"step":0.002,"discard_changes":true,"preset_changes":"discard"}`
+→ `plate_slice {}` → `project_export {"format":"gcode","path":"/abs/pa.gcode","overwrite":true}`. [ref]
 
 - `discard_changes` replaces an unsaved project; `preset_changes` is required while presets are modified:
   `"discard"` drops the edits first (a clean test), `"keep"` runs with them.
+- `test` alone, as the Calibration menu's tiles, opens the test's dialog (`blocked_by_dialog`); any
+  value of the test, or `"silent":true`, runs it with the dialog's defaults for the rest.
 - The reply has `params` (the values used, defaults filled in), `objects`, `names`,
-  `presets_changed`, `warnings`, and `result_keys` (scope and keys where the measured value goes).
+  `presets_changed`, `warnings`, and `result_keys` (the `type` and keys where the measured value goes).
 
 | test | parameters (omitted = the dialog's default) |
 |---|---|
@@ -28,21 +30,21 @@ process and filament first, then:
 
 Examples: `{"test":"flow_ratio","method":"pass1","top_surface_pattern":"monotonic",…}`;
 `{"test":"pressure_advance","method":"pattern","accelerations":[1000,2000],"speeds":[50,100],…}`
-(several objects on one plate: `slice {}`, then
-`export {"format":"sliced_3mf","plates":"all","path":"/abs/pa.gcode.3mf","overwrite":true}`);
+(several objects on one plate: `plate_slice {}`, then
+`project_export {"format":"sliced_3mf","plates":"all","path":"/abs/pa.gcode.3mf","overwrite":true}`);
 `{"test":"input_shaping_freq","start":15,"end":110,"shaper_type":"MZV",…}`. [ref]
 
 ## Apply and save a measured value
 
-`new_project {"discard_changes":true,"preset_changes":"discard"}` (drops the test's own settings) →
-`set_settings` the value in the `result_keys` scope → `save_preset` the preset to keep it. [ref]
+`project_new {"discard_changes":true,"preset_changes":"discard"}` (drops the test's own settings) →
+`settings_set` the value in the `result_keys` type → `preset_save` the preset to keep it. [ref]
 
-- Pressure advance: `set_settings {"scope":"filament","values":{"enable_pressure_advance":true,"pressure_advance":0.034}}`
-  → `save_preset {"type":"filament","name":"…"}`.
+- Pressure advance: `settings_set {"type":"filament","values":{"enable_pressure_advance":true,"pressure_advance":0.034}}`
+  → `preset_save {"type":"filament","name":"…"}`.
 - Max volumetric speed: `filament_max_volumetric_speed`; retraction: `filament_retraction_length`
   (filament override) or `retraction_length` (printer); flow: `filament_flow_ratio`.
-- VFA ripples: `set_settings {"scope":"printer","values":{"resonance_avoidance":true,
-  "min_resonance_avoidance_speed":110,"max_resonance_avoidance_speed":130}}` → `save_preset` printer.
+- VFA ripples: `settings_set {"type":"printer","values":{"resonance_avoidance":true,
+  "min_resonance_avoidance_speed":110,"max_resonance_avoidance_speed":130}}` → `preset_save` printer.
 - Cornering: `machine_max_junction_deviation` (Marlin 2 with JD) or `machine_max_jerk_x`/`_y`.
 
 Reading results:
@@ -51,7 +53,7 @@ Reading results:
 - Flow pass 1 "+5" → ratio × 1.05; pass 2 adds its offset to the pass-1 ratio.
 - Retraction tower: export the G-code and read
   `; Calib_Retraction_tower: Z_HEIGHT: 12, length:3.2` at the height (don't compute it). [ref]
-- Tolerance test: `run_action {"id":"add_handy_orca_tolerance_test"}` with
+- Tolerance test: `object_add_handy_model {"model":"orca_tolerance_test"}` with
   `{"xy_hole_compensation":0,"xy_contour_compensation":0}`.
 
 ## Traps
