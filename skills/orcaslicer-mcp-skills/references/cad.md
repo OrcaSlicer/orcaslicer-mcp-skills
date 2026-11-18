@@ -29,13 +29,13 @@ name with `tool_search {"group":"Design"}`; `tool_search`' own description lists
 ## Two forms
 
 - Given arguments, a command runs at once, as the recipes do. Called with exactly the arguments that
-  choose one of its rows in the Design tab's right-click menu (none for the command's own row), it
-  does what that row does for a person: it opens a feature card or a dialog, starts a sketch tool,
+  choose one of its items in the Design tab's right-click menu (none for the command's own item), it
+  does what that item does for a person: it opens a feature card or a dialog, starts a sketch tool,
   acts at once, or declines. The reply is
   `{"result":{"interactive":true,"tool":…,"applies":…,"modal":…,"selection_kind":…,"busy":…,"status":…}}`
   and claims nothing about which: `busy` names the card, dialog or sketch left open (null when
   none) and `status` is the tab's status line afterwards. A command's description ends with the
-  argument sets that open its rows. [ref]
+  argument sets that open its items. [ref]
   - A card: with a committed sketch, `extrude {}` opens the Extrude card
     (`"busy":"a feature card is open in the Design tab"`), from any tab, and every change command is
     refused ("Design tab busy: a feature card is open in the Design tab") until the card closes:
@@ -45,7 +45,7 @@ name with `tool_search {"group":"Design"}`; `tool_search`' own description lists
   - A dialog: in a sketch `sketch_text {}` opens the modeless Text dialog and returns with it open
     (`"modal":false`, `busy` names it): `cancel_tool {}` closes it as its Cancel does, and once text is
     typed in it `confirm_tool {}` takes its OK, which opens the text's placement (`"open":"insert"`), while
-    a row whose dialog is modal (`body_set {}`, the Color row, with a body selected, and
+    an item whose dialog is modal (`body_set {}`, the Color item, with a body selected, and
     `sketch_insert_svg {}`) holds the call, which replies `blocked_by_dialog` with a job first, as any
     command that asks does; the SVG file picker is native, so register a `dialog_auto_answer` rule
     before calling it (SKILL.md, Dialogs). [ref] `body_set {}` opens the system's colour picker, which
@@ -56,17 +56,17 @@ name with `tool_search {"group":"Design"}`; `tool_search`' own description lists
   - A sketch tool: in a sketch `sketch_draw {"type":"rectangle_2_point"}` arms the rectangle tool
     (`busy` names the open sketch, `status` the tool's hint), for the person's clicks; each `type`
     arms its own tool, and with entities selected `sketch_pattern {"type":"circular"}` the Polar array. [ref]
-  - At once: a row that acts on the selection asks nothing. A Delete row (`feature_delete {}`,
+  - At once: an item that acts on the selection asks nothing. A Delete item (`feature_delete {}`,
     `body_delete {}`, `sketch_delete {}`) deletes what is selected; `sketch_delete {}` with a sketch line
     selected removes it. Read the design back (`describe_design`, `sketch_describe`) to see what such a
     call changed.
-- So a call meant to run must give more than a row's arguments: `boolean {"operation":"cut"}` alone
+- So a call meant to run must give more than an item's arguments: `boolean {"operation":"cut"}` alone
   opens the card, `boolean {"operation":"cut","target":0,"tool":1}` cuts. A command that has both
   forms (`silent` in its schema) and whose other arguments all have defaults takes `{"silent":true}`
   alone to run with them: `extrude {"silent":true}` builds the default 20 × 20 × 10 mm box. One with a
   required argument is given that argument, which runs it silently too: `fillet {"silent":true}` is
   refused ("edges is required"), `fillet {"edges":[0],"radius":1,"body":0}` builds. [ref]
-- Called to open a tool, a row runs only in its mode: a model tool in an open sketch is refused
+- Called to open a tool, an item runs only in its mode: a model tool in an open sketch is refused
   ("finish or cancel the sketch first", `body_mass_properties {}`), a sketch tool outside one ("open a
   sketch first"). One that only the right-click menu offers is refused for a selection it doesn't take,
   with `accepts` and the `selection` in the error (`body_mass_properties {}` with nothing selected);
@@ -77,12 +77,13 @@ name with `tool_search {"group":"Design"}`; `tool_search`' own description lists
   `fillet {"edges":[0],"radius":1,"body":0}` in a sketch); the sketch commands work on the open
   sketch. [ref]
 - `tool_search {"tool":…}` shows which form a command has: `silent` in its schema for both; no
-  arguments at all for one that only does what its row does (`rename_selected`, `zoom_to_selection`);
+  arguments at all for one that only does what its menu item does (`rename_selected`,
+  `zoom_to_selection`);
   neither for one with a silent form only, which runs whatever it is given (`describe_design`,
-  `body_describe`, `commit_to_plate`), or opens a row's tool only with that row's `type`
+  `body_describe`, `commit_to_plate`), or opens an item's tool only with that item's `type`
   (`sketch_draw`, `sketch_transform`, `sketch_pattern`).
-- Select for the rows: `select_geometry {"body":0,"face":5}` (also `edges`, `vertex`, `plane`,
-  `sketch` with `loop`, `feature`; `{}` clears) selects as a click does, so the rows that take a face act
+- Select for the menu items: `select_geometry {"body":0,"face":5}` (also `edges`, `vertex`, `plane`,
+  `sketch` with `loop`, `feature`; `{}` clears) selects as a click does, so the items that take a face act
   on it, `zoom_to_selection {}` among them; `rename_selected {}` takes a body (`{"body":0}`) or a loop.
   A Feature-tree row selected with `select_geometry {"feature":i}` is what `feature_edit {}`,
   `feature_delete {}`, `rename_selected {}` and `sketch_constrain_selected {}` act on. [ref]
@@ -194,13 +195,13 @@ name with `tool_search {"group":"Design"}`; `tool_search`' own description lists
   `"ok":false` with the reason in `status` when the Confirm does not take.
 - `undo` and `redo` without `history` act on the tab shown: driving the Design tab from Prepare, a
   bare `undo {}` takes back a project change. Pass `"history":"design"`.
-- A call whose arguments are only those that choose a menu row does what the row does, not its
-  silent form: it may open a card, decline, or act on the selection at once, and a Delete row deletes
+- A call whose arguments are only those that choose a menu item does what the item does, not its
+  silent form: it may open a card, decline, or act on the selection at once, and a Delete item deletes
   with no prompt (Two forms above). To build, pass the arguments, or `{"silent":true}` where
   nothing else is required.
 - `action_run` reaches a Design tile only while the Design tab is shown in the tile's mode;
-  `tool_call` reaches every Design command from any tab, the tab need not be shown. A tile of a row
-  folded into a command (Polar array, `sk_array_polar`) runs that command with the row's arguments.
+  `tool_call` reaches every Design command from any tab, the tab need not be shown. A tile of an item
+  folded into a command (Polar array, `sk_array_polar`) runs that command with the item's arguments.
 - Face and edge ids from `body_describe` expire when the model rebuilds; deleting, moving or
   suppressing features renumbers features and bodies.
 - Design-only edits mark the project modified (`app_state.project.dirty`), so `project_new`

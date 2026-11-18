@@ -29,7 +29,7 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
 
 - **Commands first,** and the GUI tools (`widget_list`, `widget_click`, `widget_set_value`,
   `keyboard_press`, `mouse_gesture`) last.
-  - A menu row is a call of its command with the row's arguments: Mirror > Along X Axis is
+  - A menu item is a call of its command with the item's arguments: Mirror > Along X Axis is
     `object_mirror {"axis":"x"}`, a cube of a size `object_add_primitive {"shape":"cube","size":[40,40,10]}`.
     `references/actions.md` lists every Speed Dial tile a person can pick with the command and
     arguments it runs; a command that takes objects or parts acts on those it names, else on what
@@ -45,8 +45,8 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
     the command's tiles (`{}` for a tile that has none; Go to tab and Go to layer, which collect a
     value, aside) does what a person's pick of that tile does: one that asks opens its dialog
     (`blocked_by_dialog`), one that acts on the selection acts on it, and a Design command with a
-    menu row does what the row does, which can be to open a card, to decline, or to act at once on
-    the selection (a Delete row deletes it) (`references/cad.md`). Any other call runs from its
+    menu item does what the item does, which can be to open a card, to decline, or to act at once on
+    the selection (a Delete item deletes it) (`references/cad.md`). Any other call runs from its
     arguments and opens no dialog for them:
     `project_export {"format":"gcode"}` opens the file dialog,
     `project_export {"format":"gcode","path":"/abs/x.gcode"}` writes the file.
@@ -66,7 +66,7 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
   - Not sure which command, action, setting or plugin operation does something:
     `tool_search {"query":"<a few words>"}` searches them all at once, with the Python API, each
     match with how to use it. It finds every command, also those the tool list doesn't show (three
-    menu rows that take no arguments, the Design tab's and the operations plugins offer,
+    menu items that take no arguments, the Design tab's and the operations plugins offer,
     `plugin.<plugin>.<name>`), with such a one's input schema; `{"tool":"<name>"}` gives one's
     description, schema and examples, `{"group":"Design"}` the names in a group.
     `tool_call {"tool":"<name>","args":{…}}` runs any of them.

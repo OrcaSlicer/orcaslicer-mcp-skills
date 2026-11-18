@@ -121,7 +121,7 @@ and `mcp_tools_broken` (a load that fails).
 - While an operation runs (a slice, an export, or a background job a call started: arrange, orient,
   fill), other changes are refused; `app_wait` for its job or `job_cancel` it. A job a person started (typing
   in the Text gizmo) refuses changes too; reads still answer.
-- A command made from menu rows that did nothing is an error with the reason.
+- A command made from menu items that did nothing is an error with the reason.
 - A command, a person's pick of its tile and the plugin API's preset calls go through one
   function of the operations layer (`src/slic3r/GUI/Operations/`), so every route accepts and refuses
   the same states, with one wording and a `code` on the line after it (`docs/HLSD/mcp-server.md`,
@@ -145,9 +145,9 @@ shapes. Run one with `tools/mcp/orca_mcp.py run-replay tools/mcp/tests/<name>.js
 
 - `../smoke_test.json` (smallest end-to-end);
 - `scene.json` (object_transform, part_add, object_arrange, fill, object commands), `objects_*.json`
-  and `rows_*.json` (the object commands made from menu rows), `layers.json` (height ranges, variable
-  layer height, layer G-codes), `settings_targets.json` (the settings of an object, a part and a
-  height range), `multicolor.json` (part filaments, the project's settings), `plates.json` (plate
+  and `menu_items_*.json` (the object commands made from menu items), `layers.json` (height ranges,
+  variable layer height, layer G-codes), `settings_targets.json` (the settings of an object, a part
+  and a height range), `multicolor.json` (part filaments, the project's settings), `plates.json` (plate
   settings, filament slots), `presets.json` (save, compare, delete, import, preferences),
   `filaments_and_files.json`, `presets_and_plate_map.json`, `tiles_ask.json` (the tiles that ask),
   `view_switches.json`, `calibration.json`, `slice_stats.json`, `preview.json`;
@@ -170,8 +170,8 @@ Harness tests (`tools/mcp/test_*.py`, each against the launched instance): `test
 host), `test_operation_routes.py` (a command, its tile and the plugin API accept and refuse the same
 states in the same words; on a freshly launched app), `test_person_forms.py` (a call with a tile's
 arguments asks as a pick does), `test_every_tile.py` (every Speed Dial tile through `action_run`),
-`test_rows_refusals.py`, `test_additions_refusals.py`, `test_preferences.py`, `test_set_view_preview.py`,
-`test_set_view_camera.py`, `test_set_window.py`,
+`test_menu_items_refusals.py`, `test_additions_refusals.py`, `test_preferences.py`,
+`test_set_view_preview.py`, `test_set_view_camera.py`, `test_set_window.py`,
 `test_list_windows.py`, `test_webview_modal.py`, `test_action_replay_hidden.py`, and with `--cad`
 `test_cad_replay.py`, `test_cad_slow_build.py`, `test_cad_failed_job.py`, `test_cad_examples.py` (every
 Design command's examples) and the Design tab's GUI tests `test_cad_sketching.py`, `test_cad_click_edit.py`
@@ -186,12 +186,12 @@ Unit tests: `tests/slic3rutils/test_mcp_*.cpp`, `test_command_catalog.cpp` and `
 
 A new feature MCP should reach is a command, named for its place, then its verb (`object_mirror`,
 `plate_lock`), in the `McpTools*.cpp` of its place, with a description and an `input_schema` it runs
-from without asking. Where a menu row does the job, the row is a tile of the command, with the
-arguments that pick its variant: a call with exactly those arguments does what the row does, asking
+from without asking. Where a menu item does the job, the item is a tile of the command, with the
+arguments that pick its variant: a call with exactly those arguments does what the item does, asking
 where it asks, and any other call runs from its arguments. Every command is in one catalog, which
 `tools/list`, `tool_search` and `tool_call` reach by name. What the command does (its checks, its
 refusals and their wording, its undo snapshot) goes into an operation in
-`src/slic3r/GUI/Operations/` that the command and the row's GUI code both call. A new or changed
+`src/slic3r/GUI/Operations/` that the command and the menu item's GUI code both call. A new or changed
 command changes the command reference, `tests/data/command_catalog.json`, which a unit test compares
 with the catalog (`docs/HLSD/mcp-server.md`, "Making a feature reachable" and "The operations layer").
 

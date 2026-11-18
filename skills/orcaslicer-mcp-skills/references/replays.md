@@ -32,7 +32,7 @@ run a replay too.
   string; a string that is just one placeholder becomes the value itself (`"${vars.walls}"` is the
   number 2). A `script_run` step's `code` is never substituted.
 - **Steps:** `tool`, `args`, `expect`, `optional`, `await`, `save_as`, `timeout_s`. `tool` names any
-  command, also one the tool list doesn't show (a menu row's or a Design command, by its name). A step
+  command, also one the tool list doesn't show (a menu item's or a Design command, by its name). A step
   that returns a job is awaited (up to `timeout_s`, default 120) before its `expect`. A step that
   opens a dialog: `"await": false, "save_as": "x"`, then the steps that answer it, then `app_wait` job
   `${jobs.x}`.
