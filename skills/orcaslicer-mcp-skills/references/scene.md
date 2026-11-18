@@ -76,8 +76,8 @@ objects put together.
     out and names it in `skipped_plates`. [ref]
 - Print order by object: see the trap below; order with `object_order {"by":"name"}` (`height`,
   `size`, `filament`; `"descending":true`; `"all":true` for every plate; `"order":[2,0,1]` puts a
-  plate's objects in the order given). `by` alone, as its tile, reverses an order the objects already
-  have; the reply's `order` and `descending` say what it did. [ref]
+  plate's objects in the order given). `by` alone, as its Speed Dial action, reverses an order the
+  objects already have; the reply's `order` and `descending` say what it did. [ref]
 - Assemble objects into one: `object_assemble {"objects":[1,2]}` (the new object goes last). [ref]
 - Split one object into parts: `object_split {"object":0,"into":"parts"}`.
 

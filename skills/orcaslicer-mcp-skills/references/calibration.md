@@ -11,7 +11,7 @@ process and filament first, then:
 
 - `discard_changes` replaces an unsaved project; `preset_changes` is required while presets are modified:
   `"discard"` drops the edits first (a clean test), `"keep"` runs with them.
-- `test` alone, as the Calibration menu's tiles, opens the test's dialog (`blocked_by_dialog`); any
+- `test` alone, as the Calibration menu's items, opens the test's dialog (`blocked_by_dialog`); any
   value of the test, or `"silent":true`, runs it with the dialog's defaults for the rest.
 - The reply has `params` (the values used, defaults filled in), `objects`, `names`,
   `presets_changed`, `warnings`, and `result_keys` (the `type` and keys where the measured value goes).

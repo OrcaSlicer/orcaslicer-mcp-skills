@@ -31,23 +31,23 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
   `keyboard_press`, `mouse_gesture`) last.
   - A menu item is a call of its command with the item's arguments: Mirror > Along X Axis is
     `object_mirror {"axis":"x"}`, a cube of a size `object_add_primitive {"shape":"cube","size":[40,40,10]}`.
-    `references/actions.md` lists every Speed Dial tile a person can pick with the command and
+    `references/actions.md` lists every Speed Dial action a person can pick with the command and
     arguments it runs; a command that takes objects or parts acts on those it names, else on what
-    `object_select` picked. Some tiles are the person's own and have a command for agents: Action
+    `object_select` picked. Some actions are the person's own and have a command for agents: Action
     Replay `replay_run`, Run Script `script_run`, Take Screenshot (a PNG where recordings go,
     Downloads by default) `window_screenshot`, the calibration dialogs `calibration_generate_test`
     with the test's values. Leave the wiki, YouTube and plugin hub pages (`app_open_web_page`),
     About (`window_open {"window":"about"}`) and the configuration folder (`app_show_config_folder`)
-    to the person. A Design tile runs through `action_run` only while the Design tab is shown in the
-    tile's mode (in a sketch or outside one); `tool_call` runs its command from any tab
+    to the person. A Design tab action runs through `action_run` only while the Design tab is shown
+    in the action's mode (in a sketch or outside one); `tool_call` runs its command from any tab
     (`references/cad.md`).
-  - **A tile's arguments are the person's form.** A call whose arguments are exactly those of one of
-    the command's tiles (`{}` for a tile that has none; Go to tab and Go to layer, which collect a
-    value, aside) does what a person's pick of that tile does: one that asks opens its dialog
-    (`blocked_by_dialog`), one that acts on the selection acts on it, and a Design command with a
-    menu item does what the item does, which can be to open a card, to decline, or to act at once on
-    the selection (a Delete item deletes it) (`references/cad.md`). Any other call runs from its
-    arguments and opens no dialog for them:
+  - **An action's arguments are the person's form.** A call whose arguments are exactly those of one
+    of the command's Speed Dial actions (`{}` for an action that has none; Go to tab and Go to layer,
+    which collect a value, aside) does what a person's pick of that action does: one that asks opens
+    its dialog (`blocked_by_dialog`), one that acts on the selection acts on it, and a Design command
+    with a menu item does what the item does, which can be to open a card, to decline, or to act at
+    once on the selection (a Delete item deletes it) (`references/cad.md`). Any other call runs from
+    its arguments and opens no dialog for them:
     `project_export {"format":"gcode"}` opens the file dialog,
     `project_export {"format":"gcode","path":"/abs/x.gcode"}` writes the file.
     `"silent":true` runs one whose schema has `silent` from its arguments, alone where its other
@@ -56,13 +56,14 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
     command without `silent` refuses it as an unknown argument (some Design commands ignore it:
     `references/cad.md`). `recording_stop {"silent":true}` waits for the file and reports it,
     `recording_stop {}` is the person's Stop.
-  - Three kinds of call fall outside that rule. A command with no tile has no person's form: called
-    with no arguments it runs, or is refused for the argument it requires (`preset_select {}`). One
-    whose dialog is what it does opens it with arguments too: `preset_export {"path":"/abs/dir"}`
-    opens the export dialog, and the path only spares it the folder question (`printer_send`,
-    `window_open` and `app_benchmark_3d_scene` open theirs too). And what a call sets off can still
-    ask: a STEP file's import options during `project_import`, spiral vase's confirmation from
-    `settings_set`, a message when `printer_install` selects a new printer (`blocked_by_dialog`).
+  - Three kinds of call fall outside that rule. A command with no Speed Dial action has no person's
+    form: called with no arguments it runs, or is refused for the argument it requires
+    (`preset_select {}`). One whose dialog is what it does opens it with arguments too:
+    `preset_export {"path":"/abs/dir"}` opens the export dialog, and the path only spares it the
+    folder question (`printer_send`, `window_open` and `app_benchmark_3d_scene` open theirs too).
+    And what a call sets off can still ask: a STEP file's import options during `project_import`,
+    spiral vase's confirmation from `settings_set`, a message when `printer_install` selects a new
+    printer (`blocked_by_dialog`).
   - Not sure which command, action, setting or plugin operation does something:
     `tool_search {"query":"<a few words>"}` searches them all at once, with the Python API, each
     match with how to use it. It finds every command, also those the tool list doesn't show (three
@@ -128,7 +129,7 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
     cancels the picker).
 - **Refusals:** a failed call's error is its reason; where the app refused what was asked, a second
   line of JSON details follows with a stable `code`: `The project has no objects.` then
-  `{"code":"no_objects"}`. A tile runs its command, so `action_run` relays what the command's call
+  `{"code":"no_objects"}`. An action runs its command, so `action_run` relays what the command's call
   would say. Tell cases apart by the `code`, not the wording.
 - **Indices shift** after arrange, split, cut, assemble, change of part type, order by and a CAD
   commit: re-read `object_list`. Its `id` beside the index guards a call:
@@ -206,7 +207,7 @@ verified on the current build, **[hand]** verified by hand only; `→` means the
 | Python scripts and macros: computing over objects, meshes and settings, loops of tool calls, windows that ask the person, the `orca` API | `references/python.md` |
 | Replays of tool calls: sending many calls at once, answering the dialogs they open, `expect` checks, `replay_export` | `references/replays.md` |
 | Plugins: running an installed plugin's commands, pages and operations, turning plugins on and off, permission prompts; writing, installing, reloading and debugging a Python plugin | `references/plugins.md` |
-| Speed Dial tiles: ids, the command and arguments each runs, what each does | `references/actions.md` |
+| Speed Dial actions: ids, the command and arguments each runs, what each does | `references/actions.md` |
 | Reading a saved project file | `references/project-file.md` |
 | Launching OrcaSlicer with MCP, reproducing issues, replays, tests, platform notes | `references/development.md` |
 

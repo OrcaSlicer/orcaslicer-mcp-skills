@@ -66,8 +66,8 @@
   `plate_slice_stats` can refuse "Slicing is in progress": `app_wait {"for":"idle"}`, then repeat.
 - Any edit invalidates the slice: slice again before `plate_slice_stats` or export.
 - A project with no objects still exports as `"3mf"`: a design not yet committed from the Design tab
-  is one. `"gcode"`, `"sliced_3mf"` and `"stl"`, and their tiles, are refused with "The project has no
-  objects." (`no_objects`). [ref]
+  is one. `"gcode"`, `"sliced_3mf"` and `"stl"`, and their Speed Dial actions, are refused with "The
+  project has no objects." (`no_objects`). [ref]
 - `project_save` refuses a path ending in `.gcode.3mf` (`sliced_file_name`): a project is saved
   without G-code, and that file is
   `project_export {"format":"sliced_3mf","path":"/abs/x.gcode.3mf"}`. [ref]

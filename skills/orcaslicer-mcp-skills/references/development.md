@@ -122,7 +122,7 @@ and `mcp_tools_broken` (a load that fails).
   fill), other changes are refused; `app_wait` for its job or `job_cancel` it. A job a person started (typing
   in the Text gizmo) refuses changes too; reads still answer.
 - A command made from menu items that did nothing is an error with the reason.
-- A command, a person's pick of its tile and the plugin API's preset calls go through one
+- A command, a person's pick of its action and the plugin API's preset calls go through one
   function of the operations layer (`src/slic3r/GUI/Operations/`), so every route accepts and refuses
   the same states, with one wording and a `code` on the line after it (`docs/HLSD/mcp-server.md`,
   "The operations layer").
@@ -149,7 +149,7 @@ shapes. Run one with `tools/mcp/orca_mcp.py run-replay tools/mcp/tests/<name>.js
   variable layer height, layer G-codes), `settings_targets.json` (the settings of an object, a part
   and a height range), `multicolor.json` (part filaments, the project's settings), `plates.json` (plate
   settings, filament slots), `presets.json` (save, compare, delete, import, preferences),
-  `filaments_and_files.json`, `presets_and_plate_map.json`, `tiles_ask.json` (the tiles that ask),
+  `filaments_and_files.json`, `presets_and_plate_map.json`, `actions_ask.json` (the actions that ask),
   `view_switches.json`, `calibration.json`, `slice_stats.json`, `preview.json`;
 - `gizmos.json` (all 17 gizmos; at another size via `replay_run` `"vars":{"window_size":[1100,760]}`);
 - `context_menus.json`, `rows.json`, `plate_icons.json`, `dialogs_canvas_input.json`,
@@ -157,7 +157,7 @@ shapes. Run one with `tools/mcp/orca_mcp.py run-replay tools/mcp/tests/<name>.js
   (argument names and forms agents often write), `recording.json` (needs an ffmpeg with libx265 and
   libx264);
 - `ops_*.json`, one per operation of the operations layer, each driven through every route that
-  reaches it (the command, its tile and, for presets, a pick in the sidebar and the plugin API): they
+  reaches it (the command, its action and, for presets, a pick in the sidebar and the plugin API): they
   record what each call leaves, and `result.json` keeps the refusals' texts to compare between two
   builds. The preset ones need a freshly launched app, and those whose commands write files a fresh
   `--out`;
@@ -167,9 +167,9 @@ shapes. Run one with `tools/mcp/orca_mcp.py run-replay tools/mcp/tests/<name>.js
 Harness tests (`tools/mcp/test_*.py`, each against the launched instance): `test_stdio_bridge.py`,
 `test_recovery_under_load.py`, `test_cancel_pending_slice.py`, `test_ref_locator_export.py`,
 `test_worker_admission.py`, `test_export_running_job.py` (about 2 min), `test_send_gcode.py` (stub
-host), `test_operation_routes.py` (a command, its tile and the plugin API accept and refuse the same
-states in the same words; on a freshly launched app), `test_person_forms.py` (a call with a tile's
-arguments asks as a pick does), `test_every_tile.py` (every Speed Dial tile through `action_run`),
+host), `test_operation_routes.py` (a command, its action and the plugin API accept and refuse the same
+states in the same words; on a freshly launched app), `test_person_forms.py` (a call with an action's
+arguments asks as a pick does), `test_every_action.py` (every Speed Dial action through `action_run`),
 `test_menu_items_refusals.py`, `test_additions_refusals.py`, `test_preferences.py`,
 `test_set_view_preview.py`, `test_set_view_camera.py`, `test_set_window.py`,
 `test_list_windows.py`, `test_webview_modal.py`, `test_action_replay_hidden.py`, and with `--cad`
@@ -186,7 +186,7 @@ Unit tests: `tests/slic3rutils/test_mcp_*.cpp`, `test_command_catalog.cpp` and `
 
 A new feature MCP should reach is a command, named for its place, then its verb (`object_mirror`,
 `plate_lock`), in the `McpTools*.cpp` of its place, with a description and an `input_schema` it runs
-from without asking. Where a menu item does the job, the item is a tile of the command, with the
+from without asking. Where a menu item does the job, the item is an action of the command, with the
 arguments that pick its variant: a call with exactly those arguments does what the item does, asking
 where it asks, and any other call runs from its arguments. Every command is in one catalog, which
 `tools/list`, `tool_search` and `tool_call` reach by name. What the command does (its checks, its

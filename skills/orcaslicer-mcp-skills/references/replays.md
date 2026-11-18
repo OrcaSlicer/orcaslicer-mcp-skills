@@ -90,8 +90,9 @@ the run outlasts the reply budget: `app_wait` for it.
 - Native file pickers can't be answered by a step: use the tool, or the command's `path` argument that
   skips the picker, or a `dialog_auto_answer` rule registered before the step that opens it, which
   hands it a `path` or cancels it.
-- A step whose `args` are exactly a tile's (none, for a tile that has none) is the person's form of its
-  command (SKILL.md): it may open the command's dialog or a Design card, start a sketch tool, decline, or act at once on the selection
+- A step whose `args` are exactly a Speed Dial action's (none, for an action that has none) is the
+  person's form of its command (SKILL.md): it may open the command's dialog or a Design card, start a
+  sketch tool, decline, or act at once on the selection
   (`{"tool":"body_delete"}` deletes the selected body with no prompt; `references/cad.md`, "Two
   forms"). Give such a step its arguments, or `"silent": true` where the schema has `silent` and
   nothing else is required (`body_delete {"silent":true}` is refused: it needs `body`); `replay_export`

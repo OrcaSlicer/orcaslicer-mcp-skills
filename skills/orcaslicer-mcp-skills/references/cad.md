@@ -199,8 +199,8 @@ name with `tool_search {"group":"Design"}`; `tool_search`' own description lists
   silent form: it may open a card, decline, or act on the selection at once, and a Delete item deletes
   with no prompt (Two forms above). To build, pass the arguments, or `{"silent":true}` where
   nothing else is required.
-- `action_run` reaches a Design tile only while the Design tab is shown in the tile's mode;
-  `tool_call` reaches every Design command from any tab, the tab need not be shown. A tile of an item
+- `action_run` reaches a Design tab action only while the Design tab is shown in the action's mode;
+  `tool_call` reaches every Design command from any tab, the tab need not be shown. An action of an item
   folded into a command (Polar array, `sk_array_polar`) runs that command with the item's arguments.
 - Face and edge ids from `body_describe` expire when the model rebuilds; deleting, moving or
   suppressing features renumbers features and bodies.
