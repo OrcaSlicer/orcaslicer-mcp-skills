@@ -1,12 +1,34 @@
 # Gizmos and painting
 
-Gizmos have no typed tools: drive them as a person does (icon, panel fields, clicks on the model).
-Typed neighbours: variable layer height is `object_set_variable_layer_height`, parts and modifiers are
-`part_add`, part filament is `settings_set` with the target `part`.
+Seven commands open a gizmo on the object they name: `object_cut`, `object_lay_on_face`, `object_set_brim_ears`,
+`object_paint {"type":"supports"|"seam"|"color"|"fuzzy_skin"}`, `object_measure`, `object_simplify` and
+`part_boolean`. Given only the target (`{"object":0}`, also `instance` or `part`), each shows the Prepare view,
+selects it and opens the gizmo; then drive the panel as a person does (fields, clicks on the model), and close it
+with `object_select {"none":true}`. The same call again leaves it open. A gizmo that cannot open says why
+(`needs_two_parts`, `needs_two_filaments`, `needs_one_part`...) and leaves the selection as it was.
+
+Three of them also act from arguments, with no gizmo, as one undo step, closing an open gizmo first: a cut by a
+plane, lay on face by a direction, brim ears by bed position. Typed neighbours: variable layer height is
+`object_set_variable_layer_height`, parts and modifiers are `part_add`, part filament is `settings_set` with the
+target `part`.
 
 ## Recipes
 
-`object_select {"objects":[0]}` first; close with Done or a second click on the gizmo.
+- Flat base by arguments: `object_cut {"object":0,"z":3,"keep":"upper"}` keeps the part above 3 mm, placed on its
+  cut face; `{"z":10}` keeps both as two objects (`pieces` in the reply, with `open_edges` that `object_fix`
+  repairs); `"plane":{"point":[x,y,z],"normal":[1,0,1]}` cuts on a tilted plane; `"to_parts":true` keeps both as
+  parts of one object; `"upper"`/`"lower"`: `as_cut`, `place_on_cut`, `flip`. Connectors, the dovetail and a cut
+  along a contour need the gizmo (`object_cut {"object":0}` opens it). [ref]
+- Lay on a face by a direction: `object_lay_on_face {"object":0,"normal":[0,0,-1]}` (the object's own frame;
+  `"frame":"world"` for the 3D view's); every instance turns with it. Picking one of the faces the gizmo finds needs
+  the gizmo. [ref]
+- Brim ears at bed positions: `object_set_brim_ears {"object":0,"points":[{"position":[90,90],"radius":3},{"position":[110,90]}]}`
+  (radius 0.1 to 100 mm, the gizmo's default when left out); `"clear":true` removes them. They print only where the
+  object's brim type is painted: `settings_set {"target":"object","object":0,"values":{"brim_type":"painted"}}`.
+  Auto-generate needs the gizmo. [ref]
+
+Through the gizmo's own panel: open it with its command (or `object_select {"objects":[0]}` and a click on its
+icon); close with Done or `object_select {"none":true}`.
 
 - Flat base: `widget_click {"target":{"gizmo":"Cut"}}` → `widget_set_value {"target":{"imgui_name":"move_Z"},"value":3}`
   (world Z) → `widget_set_value {"target":{"imgui":"Keep","imgui_name":"lower"},"value":false}` →

@@ -60,7 +60,10 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
     form: called with no arguments it runs, or is refused for the argument it requires
     (`preset_select {}`). One whose dialog is what it does opens it with arguments too:
     `preset_export {"path":"/abs/dir"}` opens the export dialog, and the path only spares it the
-    folder question (`printer_send`, `window_open` and `app_benchmark_3d_scene` open theirs too).
+    folder question (`print_start`, `printer_send`, `window_open` and `app_benchmark_3d_scene` open theirs too).
+    The gizmo commands (`object_cut`, `object_lay_on_face`, `object_set_brim_ears`, `object_paint`,
+    `object_measure`, `object_simplify`, `part_boolean`) open their gizmo when given only the target, and act
+    with no gizmo when given an acting argument (`references/gizmos.md`).
     And what a call sets off can still ask: a STEP file's import options during `project_import`,
     spiral vase's confirmation from `settings_set`, a message when `printer_install` selects a new
     printer (`blocked_by_dialog`).
@@ -196,7 +199,7 @@ verified on the current build, **[hand]** verified by hand only; `→` means the
 | Task | File |
 |---|---|
 | Open, import, scale, size, rotate, mirror, copies, arrange, fill, plates, order, assemble | `references/scene.md` |
-| Slice numbers, preview data, export, save, plate settings, upload to a printer, video recordings | `references/output.md` |
+| Slice numbers, preview data, export, save, plate settings, print or upload to a printer, the printer's status, pause, resume, stop, video recordings | `references/output.md` |
 | Setting keys; presets: select (hidden ones too), compare, save, rename, delete, import, export; nozzle, plate type, host, preferences | `references/settings.md` |
 | Supports, blockers and enforcers, brim and ears, raft, elephant-foot compensation | `references/supports.md` |
 | Parts, negative parts, modifiers, height ranges, per-object and per-part settings, change type, rename | `references/modifiers.md` |

@@ -32,9 +32,20 @@
   them with `effective`. Name and lock: `plate_rename {"plate":1,"name":"PETG"}`,
   `plate_lock {"plate":1,"locked":true}`. `plate_list {}` reads every plate back: `overrides`, `objects`
   (how many), `sliced`, `layer_gcode`. [ref]
+- Print or send: `print_start {}` opens what the Print button's Print plate opens for the selected printer
+  (`{"plates":1}` a plate, `{"plates":"all"}` Print all where the button offers it), and `printer_send {}` what its
+  Send opens: on a Bambu-network printer the Print dialog ("Send print job") and the storage dialog ("Send to
+  Printer storage"), which the user finishes; on a print-host printer the host's upload dialog. Slice first:
+  `print_start` is refused `not_sliced` otherwise. Nothing prints until the dialog's button is pressed; press it
+  only when the user asked to print. [ref]
+- The connected printer: `printer_status {}` reads the Device tab's status (state, percent, remaining_seconds,
+  layer, file, temperatures; `{"connected":false}` with none). `print_pause {}`, `print_resume {}`,
+  `print_stop {}` (no question: it ends the print) are refused where the state does not allow them; the new state
+  shows in `printer_status` once the printer reports. [ref]
 - Upload to OctoPrint/Moonraker/PrusaLink: `settings_set {"type":"printer","values":
   {"host_type":"moonraker","print_host":"http://127.0.0.1:7125"}}` (`"printhost_apikey"` for
-  OctoPrint; `"bbl_use_printhost":true` on a Bambu printer) → `plate_slice {}` → in one `replay_run`:
+  OctoPrint; `"bbl_use_printhost":true` on a Bambu printer) → `printer_test_host {}` (`ok`, and the host's
+  `message`) → `plate_slice {}` → in one `replay_run`:
   `printer_send {}` (`"await":false`, `"save_as":"send"`) →
   `widget_set_value {"target":{"class":"wxTextCtrl","within":"Send G-code to printer host"},"value":"part.gcode","submit":false}`
   → `dialog_answer {"button":"Upload"}` (or `"Upload and Print"`) → wait job. Then poll
@@ -83,5 +94,5 @@
 
 ## Not possible
 
-G-code text through MCP (export it and read the file); a print host connection test; a typed
-upload without the Send dialog.
+G-code text through MCP (export it and read the file); a typed upload, print or send without its dialog; logging
+in to a cloud print host (the printer's connection dialog).
