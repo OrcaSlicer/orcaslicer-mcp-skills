@@ -108,9 +108,11 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
   - `settings_set {"type":"process"|"filament"|"printer","values":{...}}`, many keys per call; a key of
     another type is refused, naming it. Overrides take a `target`: `"object","object":N`,
     `"part","object":N,"part":M` (`extruder` is the filament) and
-    `"height_range","object":N,"min_z":…,"max_z":…`. The project's own settings (plate type, slot
-    colours, flushing, prime tower) are `project_set_settings {"values":{…}}`, a plate's
-    `plate_set_settings {"plate":N,"values":{…}}`, the app's preferences `preferences_set {"values":{…}}`.
+    `"height_range","object":N,"min_z":…,"max_z":…`. The filament list (slot colours, mixed
+    filaments, flushing) is read with `filament_list {}` and changed with the Filaments commands
+    (`references/multicolor.md`). The project's own settings (plate type, prime tower position) are
+    `project_set_settings {"values":{…}}`, a plate's `plate_set_settings {"plate":N,"values":{…}}`, the
+    app's preferences `preferences_set {"values":{…}}`.
   - Percents are strings (`"25%"`). Check the reply's `applied` and `changed`.
   - A per-variant value (meta `variants`, e.g. X1C speeds): one value writes the entry in use,
     `{"index":i,"value":v}` another.
@@ -159,8 +161,8 @@ description: "Use OrcaSlicer through its MCP server (tools named mcp__orcaslicer
   - "N° from vertical" is `support_threshold_angle` = 90 − N.
   - "Manual supports" means `support_type` `normal(manual)` or `tree(manual)`.
   - `flush_into_objects` prints the objects in whatever filament is loaded; use `flush_into_infill`.
-  - The print purges `flush_volumes_matrix` × `flush_multiplier` (0.3 on Bambu printers): a flush
-    of V mm³ is the entry V / `flush_multiplier`.
+  - The print purges `flush_volumes_matrix` × `flush_multiplier` (0.3 on Bambu printers; both in
+    `filament_list`): a flush of V mm³ is the entry V / `flush_multiplier`.
 - **Placement:** on the X1C rotate −45°, not +45° (front-left exclusion area). To fit a smaller
   printer use `object_scale_to_fit`, not a hand-made scale. Printing by object needs
   `extruder_clearance_radius` (68 mm on the X1C) between objects: `references/scene.md`.
@@ -203,7 +205,7 @@ verified on the current build, **[hand]** verified by hand only; `→` means the
 | Setting keys; presets: select (hidden ones too), compare, save, rename, delete, import, export; nozzle, plate type, host, preferences | `references/settings.md` |
 | Supports, blockers and enforcers, brim and ears, raft, elephant-foot compensation | `references/supports.md` |
 | Parts, negative parts, modifiers, height ranges, per-object and per-part settings, change type, rename | `references/modifiers.md` |
-| Filament slots, colours, flushing, part filaments, painting, pauses and filament changes, HueForge | `references/multicolor.md` |
+| Filament slots, colours, mixed filaments and gradients, flushing, part filaments, painting, pauses and filament changes, HueForge | `references/multicolor.md` |
 | Cut, connectors, text, SVG, boolean, measure, simplify, seam, fuzzy skin, texture, variable layer height; any gizmo | `references/gizmos.md` |
 | Calibration tests, reading and saving the result | `references/calibration.md` |
 | Design (CAD) tab: sketches, extrude, holes, threads, fillets, patterns, variables, edits, commit; any request to model or design a part, which is built there (not as a mesh written by a script), so the user gets a design they can edit | `references/cad.md` |

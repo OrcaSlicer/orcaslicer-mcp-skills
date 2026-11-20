@@ -14,7 +14,8 @@
   `{"type":"process","where":"Strength > Infill"}` returns that group in full. Read groups: a whole page
   (`"where":"Quality"`) can exceed what the client keeps in the conversation. [ref]
 - Edit: `settings_set {"type":"process"|"filament"|"printer","values":{...}}`; a filament slot's preset
-  `"filament_slot":2`. The reply's `applied` and `changed` (the app's own adjustments included). [ref]
+  `"filament_slot":2` (a mixed filament's slot has none and is refused, `mixed_filament_slot`). The
+  reply's `applied` and `changed` (the app's own adjustments included). [ref]
 - Per-variant values (meta lists `variants` and `active`, e.g. X1C speeds and temperatures "Direct
   Drive Standard, Direct Drive High Flow"): a single value writes the entry in use
   (`nozzle_temperature 215` → `"215,220"`), `{"index":1,"value":300}` another entry, an array all. [ref]
